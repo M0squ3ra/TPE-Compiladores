@@ -1,6 +1,8 @@
 .idea
+.vscode
 *.iml
 /target/*
+/test/*
 .classpath
 .project
 .settings
