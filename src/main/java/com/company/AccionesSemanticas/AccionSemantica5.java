@@ -30,11 +30,6 @@ public class AccionSemantica5 implements AccionSemantica {
 
         BigDecimal valor = new BigDecimal(convertedBuffer); 
 
-                        
-        int a = valor.compareTo(new BigDecimal("0.0"));
-        int b = valor.compareTo(this.limitePositivoMenor); 
-        int f = valor.compareTo(this.limitePositivoMayor);
-
         System.out.println("hola");
 
         if ((valor.compareTo(new BigDecimal("0.0")) == 0) ||
