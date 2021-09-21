@@ -1,28 +1,28 @@
 package com.company;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.company.Analizadores.Lexico;
+import com.company.Util.Error;
+import com.company.Util.ParTokenLexema;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class Main {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
 
-        FileInputStream inputStream = new FileInputStream(args[1]);
-        DataInputStream dataInputStr = new DataInputStream(inputStream);
-        Lexico.getInstance().setData(dataInputStr);
+        BufferedReader r = new BufferedReader(new FileReader("src/main/resources/programa.txt"));
+        
+        Lexico.getInstance().setData(r);
 
+        System.out.println("Tokens");
+        for(ParTokenLexema p: Lexico.getInstance().getTokens())
+            System.out.println(p.toString());
+        
+        System.out.println("\nErrores");
+        for(Error e: Lexico.getInstance().getErrores())
+            System.out.println(e.toString());
     }
 }

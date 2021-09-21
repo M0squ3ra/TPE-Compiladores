@@ -6,6 +6,9 @@
 .classpath
 .project
 .settings
+.factorypath
+
+yacc.exe
 
 # Default ignored files
 /shelf/

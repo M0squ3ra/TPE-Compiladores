@@ -6,42 +6,48 @@ import java.util.Map;
 public class TokensID {
     // public static final
     // los ids nos los va a dar la catedra, dicho por la jefa de catedra
-    public static final int PARENTESIS_ABRE = 1; 
-    public static final int PARENTESIS_CIERRA = 1; 
-    public static final int COMA = 1; 
-    public static final int PUNTO_Y_COMA = 1; 
-    public static final int MAS = 1; 
-    public static final int POR = 1; 
-    public static final int MENOS = 1; 
-    public static final int DIVIDIR = 1;
-    public static final int MENOR = 1;
-    public static final int MAYOR = 1;
-    public static final int MAYOR_IGUAL = 1;
-    public static final int MENOR_IGUAL = 1;
-    public static final int IGUAL = 1;
-    public static final int DIFERENTE = 1;
-    public static final int STRING = 1;
-    public static final int AND = 1;
-    public static final int OR = 1;
-    public static final int IDENTIFICADOR = 1;
-    public static final int ASIGNACION = 1;
-    public static final int FLOAT = 1;
-    public static final int INTEGER = 1;
+    
+    public static final int PARENTESIS_ABRE = 40; 
+    public static final int PARENTESIS_CIERRA = 41; 
+    public static final int COMA = 44; 
+    public static final int PUNTO_Y_COMA = 59; 
+    public static final int MAS = 43; 
+    public static final int POR = 42; 
+    public static final int MENOS = 45; 
+    public static final int DIVIDIR = 47;
+    public static final int DOS_PUNTOS = 58;
+    public static final int MENOR = 60;
+    public static final int MAYOR = 62;
+    public static final int MAYOR_IGUAL = 257;
+    public static final int MENOR_IGUAL = 258;
+    public static final int IGUALDAD = 259;
+    public static final int DIFERENTE = 260;
+    public static final int STRING = 261;
+    public static final int AND = 262;
+    public static final int OR = 263;
+    public static final int IDENTIFICADOR = 264;
+    public static final int ASIGNACION = 265;
+    public static final int CTE = 266;
+    public static final int ERROR = 267;
 
     private static Map<String,Integer> palabrasReservadas = new HashMap<String, Integer>() {{
-        put("SINGLE",1);
-        put("REPEAT",1);
-        put("INT",1);
-        put("IF",1);
-        put("THEN",1);
-        put("ELSE",1);
-        put("ENDIF",1);
-        put("PRINT",1);
-        put("FUNC",1);
-        put("RETURN",1);
-        put("BEGIN",1);
-        put("END",1);
-        put("BREAK",1);  
+        put("INT",268);
+        put("IF",269);
+        put("THEN",270);
+        put("ELSE",271);
+        put("ENDIF",272);
+        put("PRINT",273);
+        put("FUNC",274);
+        put("RETURN",275);
+        put("BEGIN",276);
+        put("END",277);
+        put("BREAK",278);  
+        put("SINGLE",279);
+        put("REPEAT",280);
+        put("PRE",281);
+        put("PRINT",282);
+        put("WHILE",283);
+        put("FLOAT",284);
     }};
 
     public static Integer getTokenPalabraReservada(String s){

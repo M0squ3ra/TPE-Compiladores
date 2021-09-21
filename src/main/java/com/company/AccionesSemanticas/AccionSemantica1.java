@@ -42,25 +42,25 @@ public class AccionSemantica1 implements AccionSemantica {
                 token = TokensID.MENOS;
                 break;
             case '&':
-                if (buffer == "&")
+                if (buffer.equals("&"))
                     token = TokensID.AND;
                 break;
             case '|':
-                if (buffer == "|")
+                if (buffer.equals("|"))
                     token = TokensID.OR;
                 break;
             case '>':
-                if (buffer == "<")
+                if (buffer.equals("<"))
                     token = TokensID.DIFERENTE;
                 break;
             case '=':
-                if (buffer == ">") {
+                if (buffer.equals(">")) {    
                     token = TokensID.MAYOR_IGUAL;
-                } else if (buffer == "<") {
+                } else if (buffer.equals("<")) {
                     token = TokensID.MENOR_IGUAL;
-                } else if (buffer == "=") {
-                    token = TokensID.IGUAL;
-                } else if (buffer == ":") {
+                } else if (buffer.equals("=")) {
+                    token = TokensID.IGUALDAD;
+                } else if (buffer.equals(":")) {
                     token = TokensID.ASIGNACION;
                 }
                 break;

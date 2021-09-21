@@ -17,9 +17,7 @@ public class AccionSemantica5 implements AccionSemantica {
     
     private final BigDecimal limitePositivoMenor = new BigDecimal("1.17549435E-38");
     private final BigDecimal limitePositivoMayor = new BigDecimal("3.40282347E+38");    
-    private final BigDecimal limiteNegativoMenor = new BigDecimal("-3.40282347E+38");
-    private final BigDecimal limiteNegativoMayor = new BigDecimal("-1.17549435E-38"); 
-    
+  
 
     @Override
     public void aplicarAccionSemantica(char c) {
@@ -27,22 +25,28 @@ public class AccionSemantica5 implements AccionSemantica {
         Lexico lexico = Lexico.getInstance();
         String buffer = lexico.getBuffer();
         
-        lexico.addSimboloEntradaInicio(c);
-        BigDecimal valor = new BigDecimal(buffer.replace('S', 'E')); 
 
-        
-       if ((valor.compareTo(new BigDecimal("0.0")) == 0) ||
-            (valor.compareTo(this.limitePositivoMenor) == 1) || 
-            (valor.compareTo(this.limitePositivoMayor) == -1) ||
-            (valor.compareTo(this.limiteNegativoMenor) == 1) ||
-            (valor.compareTo(this.limiteNegativoMayor) == -1)) {
+        String convertedBuffer = buffer.replace('S', 'E');
+
+        BigDecimal valor = new BigDecimal(convertedBuffer); 
+
+                        
+        int a = valor.compareTo(new BigDecimal("0.0"));
+        int b = valor.compareTo(this.limitePositivoMenor); 
+        int f = valor.compareTo(this.limitePositivoMayor);
+
+        System.out.println("hola");
+
+        if ((valor.compareTo(new BigDecimal("0.0")) == 0) ||
+            ((valor.compareTo(this.limitePositivoMenor) >= 0) && 
+            (valor.compareTo(this.limitePositivoMayor) <= 0))) {
 
             // agregado de la constante a la tabla de símbolos
             Map<String, Object> atributos = new HashMap<String, Object>();
             atributos.put("TIPO", "FLOAT");
             lexico.addLexemaTablaSimbolos(atributos);
 
-            ParTokenLexema tokenLexema = new ParTokenLexema(TokensID.FLOAT, lexico.getBuffer());
+            ParTokenLexema tokenLexema = new ParTokenLexema(TokensID.CTE, lexico.getBuffer());
 
             lexico.addToken(tokenLexema);
         } else {

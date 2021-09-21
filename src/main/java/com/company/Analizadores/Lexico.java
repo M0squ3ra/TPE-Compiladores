@@ -1,5 +1,6 @@
 package com.company.Analizadores;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -32,13 +33,12 @@ public class Lexico {
     private static int linea;
     private static String buffer;
     public static final int TAMANO_BUFFER = 22;
-    private static DataInputStream data;
+    private static BufferedReader data;
     private static List<ParTokenLexema> reconocidos;
     private static List<Character> entrada;
     private static Map<String, Map<String, Object>> tablaSimbolos;
     private static List<Error> errores;
     
-
     
     public static Lexico getInstance(){
         if(Lexico.lexico == null)
@@ -46,7 +46,7 @@ public class Lexico {
         return Lexico.lexico;
     }
 
-    public void setData(DataInputStream d) {
+    public void setData(BufferedReader d) {
         Lexico.data = d;
     }
 
@@ -98,23 +98,22 @@ public class Lexico {
         Lexico.columnaSimbolo.put(' ', 21);
         Lexico.columnaSimbolo.put('S', 22);
         Lexico.columnaSimbolo.put('$', 23);
-
-        //
         
         Lexico.matrizTransicion = new int[][]
         {
             {1,2,1,3,18,18,18,9,8,0,12,14,13,15,16,18,18,18,18,17,0,0,1,18,18},
-            {1,1,1,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,1,18,18},
+            {1,1,1,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,1,18,18},
+            {18,2,18,3,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
             {18,4,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,5,18,18},
             {18,4,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,5,18,18},
             {-1,7,-1,-1,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,18},
             { -1,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,18},
-            {18,-1,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
+            {18,7,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
             {8,8,8,8,8,8,8,8,18,8,8,8,8,8,8,8,8,8,8,8,8,8,8,18,18},
             {18,18,18,18,18,18,18,10,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
             {10,10,10,10,10,10,10,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,18,18},
-            {10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,18,18},
-            {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+            {10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,18,18},
+            {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
             {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
             {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
             {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
@@ -137,23 +136,23 @@ public class Lexico {
     
                 Lexico.matrizAccionesSemanticas = new AccionSemantica[][]
         {
-            {as2,as2,as2,as2,as1,as1,as2,as2,as8,as2,as2,as2,as2,as2,as1,as1,as1,as1,as1,as2,as8,as8,as2,as1,as1},  //0
-            {as3,as3,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as2,as2,as1,as1,as1,as1,as1,as2,as8,as8,as2,as1,as1},  //1
+            {as2,as2,as2,as2,as1,as1,as1,as2,as2,as8,as2,as2,as2,as2,as2,as1,as1,as1,as1,as2,as8,as8,as2,as1,as1},  //0
+            {as3,as3,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4},  //1
             {as6,as3,as6,as3,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6},  //2
             {as6,as3,as6,as3,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as3,as6,as6},  //3
-            {as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5},  //4
+            {as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as3,as5,as5},  //4
             {ase,as3,ase,ase,as3,as3,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //5
             {ase,as3,ase,ase,as3,as3,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //6
-            {as5,ase,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5},  //7
-            {as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3},  //8
+            {as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5},  //7
+            {as3,as3,as3,as3,as3,as3,as3,as3,as1,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3,as3},  //8
             {as7,as7,as7,as7,as7,as7,as7,as8,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //9 
             {as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8},  //10
             {as8,as8,as8,as8,as8,as8,as8,as9,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8},  //11 
-            {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //12
-            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //13
-            {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //14
-            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as7,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},   //15
-            {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase},   //16
+            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //12
+            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //13
+            {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //14
+            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as7,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},   //15
+            {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},   //16
             {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase},   //17
         }; 
     }
@@ -179,30 +178,36 @@ public class Lexico {
     }
     
     public List<ParTokenLexema> getTokens() throws IOException {
-        List<ParTokenLexema> tokens = new ArrayList<ParTokenLexema>();
+
         Character c = getSimboloEntrada();
 
         Integer estado = 0;
         
-        while (c != null){
+        while (Lexico.columnaSimbolo.get(c) != null){
 
-            Lexico.matrizAccionesSemanticas[estado][Lexico.columnaSimbolo.get(estado)].aplicarAccionSemantica(c);
-            
-            estado = matrizTransicion[estado][Lexico.columnaSimbolo.get(estado)];
+            AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][Lexico.columnaSimbolo.get(c)];
 
-            if (estado == 18)
+            as.aplicarAccionSemantica(c);
+
+            estado = matrizTransicion[estado][Lexico.columnaSimbolo.get(c)];
+
+            if (estado == 18) 
                 estado = 0;
+            
+            if (estado == -1){
+                estado = 0;
+                Error error = new Error("Error de sintaxis.", false, Lexico.linea);
+                Lexico.errores.add(error);
+            }
 
             c = getSimboloEntrada();
         }
 
-        return tokens;
+        return Lexico.reconocidos;
     }
 
-    // Aca leemos los tokens reconocidos y se los pasamos de a uno
-    // lo podemos ir haciendo con reconocidos.remove(0)
     public int yylex(){
-        return 0;
+        return Lexico.reconocidos.remove(0).getToken();
     }
 
 
@@ -245,7 +250,7 @@ public class Lexico {
         
         if (Lexico.entrada.isEmpty()){
             try {
-                Lexico.entrada.add(Lexico.data.readChar());
+                Lexico.entrada.add((char) Lexico.data.read());
             } catch(EOFException e) {
                 LogManager.getLogger(Lexico.class).info("Fin archivo");
             }
@@ -262,6 +267,10 @@ public class Lexico {
         return retorno;
     }
 
+    public List<Error> getErrores(){
+        return Lexico.errores;
+    }
+
     // Esto lo utilizariamos cuando
     // un axioma quiere devolver el simbolo a la entrada
     public void addSimboloEntradaInicio(char c) {
@@ -271,5 +280,6 @@ public class Lexico {
     public void addError(Error e) {
         Lexico.errores.add(e);
     }
+
 
 }

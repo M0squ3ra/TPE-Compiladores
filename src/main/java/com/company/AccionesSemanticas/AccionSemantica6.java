@@ -36,7 +36,7 @@ public class AccionSemantica6 implements AccionSemantica {
                 Lexico.getInstance().getLinea()));
         } else {
             
-            ParTokenLexema tokenLexema = new ParTokenLexema(TokensID.FLOAT, lexico.getBuffer());
+            ParTokenLexema tokenLexema = new ParTokenLexema(TokensID.CTE, lexico.getBuffer());
             lexico.addToken(tokenLexema);
 
             // agregar entero a la tabla de símbolos.

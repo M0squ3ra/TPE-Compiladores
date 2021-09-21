@@ -7,7 +7,7 @@ import com.company.Util.TokensID;
 public class AccionSemantica7 implements AccionSemantica {
 
 /*
-    Devolver la entrada y devolver token.
+    Devolver el caracter a la entrada y devolver token.
 */
 
     @Override
@@ -28,6 +28,9 @@ public class AccionSemantica7 implements AccionSemantica {
                 break;
             case ">":
                 token = TokensID.MAYOR;
+                break;
+            case ":":
+                token = TokensID.DOS_PUNTOS;
                 break;
             default:
                 break;
