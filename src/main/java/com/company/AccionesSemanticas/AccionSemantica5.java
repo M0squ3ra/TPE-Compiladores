@@ -25,12 +25,9 @@ public class AccionSemantica5 implements AccionSemantica {
         Lexico lexico = Lexico.getInstance();
         String buffer = lexico.getBuffer();
         
-
         String convertedBuffer = buffer.replace('S', 'E');
 
         BigDecimal valor = new BigDecimal(convertedBuffer); 
-
-        System.out.println("hola");
 
         if ((valor.compareTo(new BigDecimal("0.0")) == 0) ||
             ((valor.compareTo(this.limitePositivoMenor) >= 0) && 
