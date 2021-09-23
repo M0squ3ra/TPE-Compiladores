@@ -9,8 +9,9 @@ public class AccionSemantica9 implements AccionSemantica{
     */
 
     @Override
-    public void aplicarAccionSemantica(char c) {
+    public Integer aplicarAccionSemantica(char c) {
         Lexico.getInstance().vaciarBuffer();
+        return null;
     }
     
 }

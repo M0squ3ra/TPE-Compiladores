@@ -5,9 +5,10 @@ import com.company.Analizadores.Lexico;
 public class AccionSemantica2 implements AccionSemantica{
 
     @Override
-    public void aplicarAccionSemantica(char c) {
+    public Integer aplicarAccionSemantica(char c) {
         Lexico.getInstance().vaciarBuffer();
-        Lexico.getInstance().concatenarBuffer(c);      
+        Lexico.getInstance().concatenarBuffer(c);    
+        return null;  
     }
 
     

@@ -1,7 +1,6 @@
 package com.company.AccionesSemanticas;
 
 import com.company.Analizadores.Lexico;
-import com.company.Util.ParTokenLexema;
 import com.company.Util.TokensID;
 
 public class AccionSemantica7 implements AccionSemantica {
@@ -11,7 +10,7 @@ public class AccionSemantica7 implements AccionSemantica {
 */
 
     @Override
-    public void aplicarAccionSemantica(char c) {
+    public Integer aplicarAccionSemantica(char c) {
 
         
 
@@ -36,11 +35,10 @@ public class AccionSemantica7 implements AccionSemantica {
                 break;
         };
 
-        ParTokenLexema parTokenLexema = new ParTokenLexema(token, null);
-        lexico.addToken(parTokenLexema);
-
         // devolver entrada.
         lexico.addSimboloEntradaInicio(c);
+
+        return token;
     }
 
 }

@@ -9,13 +9,13 @@ public class TokensID {
     
     public static final int PARENTESIS_ABRE = 40; 
     public static final int PARENTESIS_CIERRA = 41; 
-    public static final int COMA = 44; 
-    public static final int PUNTO_Y_COMA = 59; 
-    public static final int MAS = 43; 
     public static final int POR = 42; 
+    public static final int MAS = 43; 
+    public static final int COMA = 44; 
     public static final int MENOS = 45; 
     public static final int DIVIDIR = 47;
     public static final int DOS_PUNTOS = 58;
+    public static final int PUNTO_Y_COMA = 59; 
     public static final int MENOR = 60;
     public static final int MAYOR = 62;
     public static final int MAYOR_IGUAL = 257;

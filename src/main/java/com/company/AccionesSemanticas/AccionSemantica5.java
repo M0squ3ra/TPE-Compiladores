@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.company.Analizadores.Lexico;
 import com.company.Util.Error;
-import com.company.Util.ParTokenLexema;
 import com.company.Util.TokensID;
 
 public class AccionSemantica5 implements AccionSemantica {
@@ -20,7 +19,7 @@ public class AccionSemantica5 implements AccionSemantica {
   
 
     @Override
-    public void aplicarAccionSemantica(char c) {
+    public Integer aplicarAccionSemantica(char c) {
 
         Lexico lexico = Lexico.getInstance();
         String buffer = lexico.getBuffer();
@@ -28,6 +27,9 @@ public class AccionSemantica5 implements AccionSemantica {
         String convertedBuffer = buffer.replace('S', 'E');
 
         BigDecimal valor = new BigDecimal(convertedBuffer); 
+
+        // devolver la entrada leida.
+        lexico.addSimboloEntradaInicio(c);
 
         if ((valor.compareTo(new BigDecimal("0.0")) == 0) ||
             ((valor.compareTo(this.limitePositivoMenor) >= 0) && 
@@ -38,16 +40,15 @@ public class AccionSemantica5 implements AccionSemantica {
             atributos.put("TIPO", "FLOAT");
             lexico.addLexemaTablaSimbolos(atributos);
 
-            ParTokenLexema tokenLexema = new ParTokenLexema(TokensID.CTE, lexico.getBuffer());
+            return TokensID.CTE;
 
-            lexico.addToken(tokenLexema);
         } else {
             Error error = new Error("Flotante fuera de rango.", false, lexico.getLinea());
             lexico.addError(error);
+
+            return TokensID.ERROR;
         }
 
-        // devolver la entrada leida.
-        lexico.addSimboloEntradaInicio(c);
     }
     
 }

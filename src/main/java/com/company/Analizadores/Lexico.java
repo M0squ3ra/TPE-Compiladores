@@ -1,8 +1,5 @@
 package com.company.Analizadores;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +17,9 @@ import com.company.AccionesSemanticas.AccionSemantica7;
 import com.company.AccionesSemanticas.AccionSemantica8;
 import com.company.AccionesSemanticas.AccionSemantica9;
 import com.company.AccionesSemanticas.AccionSemanticaError;
-import com.company.Util.ParTokenLexema;
+import com.company.Util.TokensID;
 import com.company.Util.Error;
 
-import org.apache.logging.log4j.LogManager;
 
 public class Lexico {
     private static Map<Character, Integer> columnaSimbolo;
@@ -33,9 +29,7 @@ public class Lexico {
     private static int linea;
     private static String buffer;
     public static final int TAMANO_BUFFER = 22;
-    private static BufferedReader data;
-    private static List<ParTokenLexema> reconocidos;
-    private static List<Character> entrada;
+    private static List<Character> data;
     private static Map<String, Map<String, Object>> tablaSimbolos;
     private static List<Error> errores;
     
@@ -46,7 +40,7 @@ public class Lexico {
         return Lexico.lexico;
     }
 
-    public void setData(BufferedReader d) {
+    public void setData(List<Character> d) {
         Lexico.data = d;
     }
 
@@ -56,8 +50,6 @@ public class Lexico {
         Lexico.buffer = null;
         Lexico.buffer = "";
         Lexico.data = null;
-        Lexico.reconocidos = new ArrayList<ParTokenLexema>();
-        Lexico.entrada = new ArrayList<Character>();
 
         Lexico.columnaSimbolo = new HashMap<Character, Integer>();
         Lexico.tablaSimbolos = new HashMap<String, Map<String, Object>>();
@@ -139,7 +131,7 @@ public class Lexico {
             {as2,as2,as2,as2,as1,as1,as1,as2,as2,as8,as2,as2,as2,as2,as2,as1,as1,as1,as1,as2,as8,as8,as2,as1,as1},  //0
             {as3,as3,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4},  //1
             {as6,as3,as6,as3,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6},  //2
-            {as6,as3,as6,as3,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as3,as6,as6},  //3
+            {as5,as3,as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as3,as5,as5},  //3
             {as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as3,as5,as5},  //4
             {ase,as3,ase,ase,as3,as3,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //5
             {ase,as3,ase,ase,as3,as3,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //6
@@ -177,42 +169,37 @@ public class Lexico {
         Lexico.buffer += String.valueOf(c);
     }
     
-    public List<ParTokenLexema> getTokens() throws IOException {
+    
+    public int yylex() throws IOException{
 
-        Character c = getSimboloEntrada();
-
+        Character c;
         Integer estado = 0;
-        
-        while (Lexico.columnaSimbolo.get(c) != null){
+        Integer token = null;
+
+        while(token == null){
+            // Cuando llega al final del archivo devuelve el ascii 149
+            c = getSimboloEntrada();
+            
+            if(c == null)
+                return 0;
 
             AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][Lexico.columnaSimbolo.get(c)];
 
-            as.aplicarAccionSemantica(c);
+            token = as.aplicarAccionSemantica(c);
 
             estado = matrizTransicion[estado][Lexico.columnaSimbolo.get(c)];
 
-            if (estado == 18) 
-                estado = 0;
-            
             if (estado == -1){
                 estado = 0;
                 Error error = new Error("Error de sintaxis.", false, Lexico.linea);
                 Lexico.errores.add(error);
+                
+                token = TokensID.ERROR;
             }
 
-            c = getSimboloEntrada();
         }
 
-        return Lexico.reconocidos;
-    }
-
-    public int yylex(){
-        return Lexico.reconocidos.remove(0).getToken();
-    }
-
-
-    public void addToken(ParTokenLexema parTokenLexema) {
-        Lexico.reconocidos.add(parTokenLexema);
+        return token;
     }
     
     public int getLinea() {
@@ -221,6 +208,15 @@ public class Lexico {
 
     public void addLinea() {
         Lexico.linea++;
+    }
+
+    // para yylval en Parser.java
+    public ParserVal getyylval(){
+        return new ParserVal(Lexico.buffer);
+    }
+
+    public Map<String, Object> getAtributosLexema(String lexema){
+        return Lexico.tablaSimbolos.get(lexema);
     }
 
     public void addLexemaTablaSimbolos(Map<String, Object> propiedadesLexema) {
@@ -245,36 +241,19 @@ public class Lexico {
     // Retorna null en el caso donde no hay mas entradas, ni del codigo fuente 
     // ni por simbolos añadidos por acciones semanticas
     public Character getSimboloEntrada() throws IOException {
-        // Si no se agrego un simbolo mediante una accion semantica
-        // lo lee del codigo fuente
-        
-        if (Lexico.entrada.isEmpty()){
-            try {
-                Lexico.entrada.add((char) Lexico.data.read());
-            } catch(EOFException e) {
-                LogManager.getLogger(Lexico.class).info("Fin archivo");
-            }
-        }
-        
-        Character retorno = null;
-        
-        try {
-            retorno = Lexico.entrada.remove(0);
-        } catch (IndexOutOfBoundsException e) {
-            LogManager.getLogger(Lexico.class).info("No hay mas entrada");
-        }
-        
-        return retorno;
+        if(Lexico.data.size() > 0)
+            return Lexico.data.remove(0);
+        return null;
     }
 
-    public List<Error> getErrores(){
+    public List<Error> getErroresLexicos(){
         return Lexico.errores;
     }
 
     // Esto lo utilizariamos cuando
     // un axioma quiere devolver el simbolo a la entrada
     public void addSimboloEntradaInicio(char c) {
-        Lexico.entrada.add(0,c);
+        Lexico.data.add(0,c);
     }
 
     public void addError(Error e) {

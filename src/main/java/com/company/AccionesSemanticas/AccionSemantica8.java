@@ -11,11 +11,13 @@ public class AccionSemantica8 implements AccionSemantica {
     */
 
     @Override
-    public void aplicarAccionSemantica(char c) {
+    public Integer aplicarAccionSemantica(char c) {
 
         if (c == '\n') {
             Lexico.getInstance().addLinea();
         }
+
+        return null;
     }
     
 }

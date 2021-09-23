@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.company.Analizadores.Lexico;
-import com.company.Util.ParTokenLexema;
 import com.company.Util.TokensID;
 import com.company.Util.Error;
 
@@ -18,25 +17,27 @@ public class AccionSemantica4 implements AccionSemantica {
      */
 
     @Override
-    public void aplicarAccionSemantica(char c) {
+    public Integer aplicarAccionSemantica(char c) {
 
-        // Devolver a la entrada el último caracter leído.
-        Lexico.getInstance().addSimboloEntradaInicio(c);    
         
-
+        
         // Ver si lo almacenado en el buffer es una palabra reservada.
         Lexico lexico = Lexico.getInstance();
         String buffer = lexico.getBuffer();
         Integer token = TokensID.getTokenPalabraReservada(buffer);
-
+        
+        // Devolver a la entrada el último caracter leído.
+        lexico.addSimboloEntradaInicio(c);   
+        
+        
         if (token != null){
-            lexico.addToken(new ParTokenLexema(token, null));
+            return token;
         } else {
             token = TokensID.IDENTIFICADOR;
             
             if (lexico.containsTablaSimbolos(buffer)) {
                 // caso en que ya está registrado el lexema en la tabla de símbolos.
-                lexico.addToken(new ParTokenLexema(token, buffer));
+                return token;
             } else {
                 // caso en que el lexema no se encuentra en la tabla de símbolos.
                 Map<String, Object> propiedadesLexema = new HashMap<String, Object>();
@@ -52,8 +53,7 @@ public class AccionSemantica4 implements AccionSemantica {
                 // se agrega el lexema a la tabla de símbolos.
                 lexico.addLexemaTablaSimbolos(propiedadesLexema);
                 
-                // devolver par [token, lexema]
-                lexico.addToken(new ParTokenLexema(token, buffer));
+                return token;
             }
             
         }
