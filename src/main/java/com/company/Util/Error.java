@@ -14,7 +14,7 @@ public class Error {
     @Override
     public String toString() {
         String errorType = ((this.warning) ? "WARNING" : "ERROR");
-        return "[" + errorType + "] - line " + this.line + " - " + this.message;
+        return "[" + errorType + "] - linea " + this.line + " - " + this.message;
     }
 
 }

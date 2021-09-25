@@ -6,6 +6,7 @@ import java.util.Map;
 public class TokensID {
     // public static final
     // los ids nos los va a dar la catedra, dicho por la jefa de catedra
+    public static final int FIN_PROGRAMA = 0;
     
     public static final int PARENTESIS_ABRE = 40; 
     public static final int PARENTESIS_CIERRA = 41; 
@@ -22,7 +23,7 @@ public class TokensID {
     public static final int MENOR_IGUAL = 258;
     public static final int IGUALDAD = 259;
     public static final int DIFERENTE = 260;
-    public static final int STRING = 261;
+    public static final int CADENA = 261;
     public static final int AND = 262;
     public static final int OR = 263;
     public static final int IDENTIFICADOR = 264;
@@ -45,9 +46,9 @@ public class TokensID {
         put("SINGLE",279);
         put("REPEAT",280);
         put("PRE",281);
-        put("PRINT",282);
-        put("WHILE",283);
-        put("FLOAT",284);
+        put("WHILE",282);
+        put("FLOAT",283);
+        put("DO",284);
     }};
 
     public static Integer getTokenPalabraReservada(String s){

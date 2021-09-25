@@ -1,5 +1,85 @@
+INT a, b;
+
+FLOAT FUNC mi_funcion (INT b)
+INT a, b;
+
+    WHILE (A + B > 3) DO
+    BEGIN
+        A := 5;
+    END
+    // comentario //
+    REPEAT (I := 999; I <> M + 2; 5 )
+    BEGIN
+        Z := 6;
+    END
+
+    A := 5;
+    A := 6;
+    A := 7;
+    RETURN(a+b);
+END;
+
+FLOAT FUNC mi_funcion (INT b)
+INT a, b;
 BEGIN
-IF (A + B == 3)
-    A := 500000000000000;
-    B := 3.;
-END
+
+    WHILE (A + B > 3) DO
+    BEGIN
+        A := 5;
+    END
+
+    REPEAT (I := 999; I <> M + 2; 5 )
+    BEGIN
+        Z := 6;
+    END
+
+    A := 5;
+    A := 6;
+    A := 7;
+    (a+b);
+END;
+
+FLOAT FUNC mi_funcion (INT b)
+INT a, b;
+BEGIN
+
+    WHILE (A + B > 3) DO
+    BEGIN
+        A := 5;
+    END
+
+    REPEAT (I := 999; I <> M + 2; 5 )
+    BEGIN
+        Z := 6;
+    END
+
+    A := 5;
+    A := 6;
+    A := 7;
+    RETURN(a+b);
+
+FUNC mi_funcion (INT b)
+INT a, b;
+BEGIN
+
+    WHILE (A + B > 3) DO
+    BEGIN
+        A := 5;
+    END
+
+    REPEAT (I := 999; I <> M + 2; 5 )
+    BEGIN
+        Z := 6;
+    END
+
+    A := 5;
+    A := 6;
+    A := 7;
+    RETURN(a+b);
+END;
+
+BEGIN
+    A := 5;
+    B := 8 + C - D;
+    PRINT(%ASDSA%);
+END $

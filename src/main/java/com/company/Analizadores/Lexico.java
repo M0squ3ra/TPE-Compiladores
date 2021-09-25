@@ -129,7 +129,7 @@ public class Lexico {
                 Lexico.matrizAccionesSemanticas = new AccionSemantica[][]
         {
             {as2,as2,as2,as2,as1,as1,as1,as2,as2,as8,as2,as2,as2,as2,as2,as1,as1,as1,as1,as2,as8,as8,as2,as1,as1},  //0
-            {as3,as3,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4},  //1
+            {as3,as3,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as3,as4,as4,as4,as4,as4,as4,as4,as4,as4,as3,as4,as4},  //1
             {as6,as3,as6,as3,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6,as6},  //2
             {as5,as3,as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as3,as5,as5},  //3
             {as5,as3,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as5,as3,as5,as5},  //4
@@ -141,7 +141,7 @@ public class Lexico {
             {as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8},  //10
             {as8,as8,as8,as8,as8,as8,as8,as9,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8,as8},  //11 
             {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //12
-            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //13
+            {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as1,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},  //13
             {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},  //14
             {as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as1,as7,as1,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7,as7},   //15
             {ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase,as1,ase,ase,ase,ase,ase,ase,ase,ase,ase,ase},   //16
@@ -175,20 +175,17 @@ public class Lexico {
         Character c;
         Integer estado = 0;
         Integer token = null;
-
+        
         while(token == null){
-            // Cuando llega al final del archivo devuelve el ascii 149
+                            
             c = getSimboloEntrada();
             
-            if(c == null)
-                return 0;
-
             AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][Lexico.columnaSimbolo.get(c)];
-
+            
             token = as.aplicarAccionSemantica(c);
-
+            
             estado = matrizTransicion[estado][Lexico.columnaSimbolo.get(c)];
-
+            
             if (estado == -1){
                 estado = 0;
                 Error error = new Error("Error de sintaxis.", false, Lexico.linea);
@@ -197,6 +194,7 @@ public class Lexico {
                 token = TokensID.ERROR;
             }
 
+            
         }
 
         return token;
@@ -222,6 +220,12 @@ public class Lexico {
     public void addLexemaTablaSimbolos(Map<String, Object> propiedadesLexema) {
         /* agrega el buffer actual a la tabla de símbolos */
         Lexico.tablaSimbolos.put(Lexico.buffer, propiedadesLexema);
+    }
+
+    // Especifico para CADENA
+    public void addLexemaTablaSimbolos(Map<String, Object> propiedadesLexema, String lexico) {
+        /* agrega el buffer actual a la tabla de símbolos */
+        Lexico.tablaSimbolos.put(lexico, propiedadesLexema);
     }
 
     public void addAtributoLexema(String lexema, String nombreAtributo, Object valorAtributo) {
@@ -258,6 +262,10 @@ public class Lexico {
 
     public void addError(Error e) {
         Lexico.errores.add(e);
+    }
+
+    public Map<String, Map<String, Object>> getTablaSimbolos(){
+        return Lexico.tablaSimbolos;
     }
 
 

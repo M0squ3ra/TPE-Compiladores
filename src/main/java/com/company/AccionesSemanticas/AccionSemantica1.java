@@ -1,5 +1,8 @@
 package com.company.AccionesSemanticas;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.company.Analizadores.Lexico;
 import com.company.Util.TokensID;
 
@@ -19,6 +22,9 @@ public class AccionSemantica1 implements AccionSemantica {
         String buffer = lexico.getBuffer();
 
         switch (c) {
+            case '$':
+                token = TokensID.FIN_PROGRAMA;
+                break;
             case '(':
                 token = TokensID.PARENTESIS_ABRE;
                 break;
@@ -39,6 +45,14 @@ public class AccionSemantica1 implements AccionSemantica {
                 break;
             case '-':
                 token = TokensID.MENOS;
+                break;
+            case '%':
+                if (buffer.substring(0,1) .equals("%")){
+                    token = TokensID.CADENA;
+                    Map<String, Object> propiedadesLexema = new HashMap<String, Object>();
+                    propiedadesLexema.put("TIPO", "CADENA");
+                    lexico.addLexemaTablaSimbolos(propiedadesLexema, buffer + "%");
+                }
                 break;
             case '&':
                 if (buffer.equals("&"))
