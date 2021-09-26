@@ -13,7 +13,7 @@ public class AccionSemantica6 implements AccionSemantica {
     /*
         Se verifica el rango del entero.
     */
-    private final BigDecimal limite = new BigDecimal("32767");
+    private final BigDecimal limite = new BigDecimal("32768");
 
     @Override
     public Integer aplicarAccionSemantica(char c) {
@@ -24,13 +24,11 @@ public class AccionSemantica6 implements AccionSemantica {
         lexico.addSimboloEntradaInicio(c);
 
         BigDecimal valor = new BigDecimal(lexico.getBuffer());
-
         if (valor.compareTo(limite) > 0) {
             Lexico.getInstance().addError(new Error(
                 "Entero fuera de rango", 
                 false, 
-                Lexico.getInstance().getLinea()));
-            
+                Lexico.getInstance().getLinea()));                
             return TokensID.ERROR;
         } else {
             // agregar entero a la tabla de símbolos.

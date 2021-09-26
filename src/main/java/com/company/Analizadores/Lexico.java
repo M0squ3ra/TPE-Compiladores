@@ -91,6 +91,7 @@ public class Lexico {
         Lexico.columnaSimbolo.put('S', 22);
         Lexico.columnaSimbolo.put('$', 23);
         
+        
         Lexico.matrizTransicion = new int[][]
         {
             {1,2,1,3,18,18,18,9,8,0,12,14,13,15,16,18,18,18,18,17,0,0,1,18,18},
@@ -101,9 +102,9 @@ public class Lexico {
             {-1,7,-1,-1,6,6,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,18},
             { -1,7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,18},
             {18,7,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
-            {8,8,8,8,8,8,8,8,18,8,8,8,8,8,8,8,8,8,8,8,8,8,8,18,18},
+            {8,8,8,8,8,8,8,8,18,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
             {18,18,18,18,18,18,18,10,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
-            {10,10,10,10,10,10,10,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,18,18},
+            {10,10,10,10,10,10,10,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10},
             {10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,18,18},
             {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
             {18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18},
@@ -179,12 +180,11 @@ public class Lexico {
         while(token == null){
                             
             c = getSimboloEntrada();
-            
-            AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][Lexico.columnaSimbolo.get(c)];
-            
+
+            AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][getColumnaSimbolo(c)];
             token = as.aplicarAccionSemantica(c);
-            
-            estado = matrizTransicion[estado][Lexico.columnaSimbolo.get(c)];
+
+            estado = matrizTransicion[estado][getColumnaSimbolo(c)];
             
             if (estado == -1){
                 estado = 0;
@@ -196,7 +196,6 @@ public class Lexico {
 
             
         }
-
         return token;
     }
     
@@ -266,7 +265,11 @@ public class Lexico {
 
     public Map<String, Map<String, Object>> getTablaSimbolos(){
         return Lexico.tablaSimbolos;
-    }
+    }    
 
-
+    public void cambiarSimboloConstante(String lexema){
+        Map<String,Object> atributos = getAtributosLexema(lexema);
+        Lexico.tablaSimbolos.remove(lexema);
+        Lexico.tablaSimbolos.put("-"+lexema, atributos);
+    }    
 }

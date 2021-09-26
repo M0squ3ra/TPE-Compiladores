@@ -3,83 +3,125 @@ INT a, b;
 FLOAT FUNC mi_funcion (INT b)
 INT a, b;
 
-    WHILE (A + B > 3) DO
-    BEGIN
-        A := 5;
-    END
     // comentario //
     REPEAT (I := 999; I <> M + 2; 5 )
     BEGIN
         Z := 6;
     END
-
     A := 5;
-    A := 6;
-    A := 7;
-    RETURN(a+b);
-END;
-
-FLOAT FUNC mi_funcion (INT b)
-INT a, b;
-BEGIN
-
-    WHILE (A + B > 3) DO
-    BEGIN
-        A := 5;
-    END
-
-    REPEAT (I := 999; I <> M + 2; 5 )
-    BEGIN
-        Z := 6;
-    END
-
-    A := 5;
-    A := 6;
-    A := 7;
-    (a+b);
-END;
-
-FLOAT FUNC mi_funcion (INT b)
-INT a, b;
-BEGIN
-
-    WHILE (A + B > 3) DO
-    BEGIN
-        A := 5;
-    END
-
-    REPEAT (I := 999; I <> M + 2; 5 )
-    BEGIN
-        Z := 6;
-    END
-
-    A := 5;
-    A := 6;
-    A := 7;
-    RETURN(a+b);
-
-FUNC mi_funcion (INT b)
-INT a, b;
-BEGIN
-
-    WHILE (A + B > 3) DO
-    BEGIN
-        A := 5;
-    END
-
-    REPEAT (I := 999; I <> M + 2; 5 )
-    BEGIN
-        Z := 6;
-    END
-
-    A := 5;
-    A := 6;
-    A := 7;
+    A := -6;
+    A := 6.1;
+    A := -7.S-1;
+    A := 32768;
+    A := -6000000000000000000000000000000;
+    A := -32768;
+    A := -32767;
+    A := 32767;
+    A := 6000000000000000000000000000000;
+    A := 7.S-39;
+    A := -7.S-39;
     RETURN(a+b);
 END;
 
 BEGIN
-    A := 5;
-    B := 8 + C - D;
-    PRINT(%ASDSA%);
+
+    //-----     ERRORES     -----//
+    //--    ASIGNACION  --//
+    A := A + B;
+    := A + B;
+    C A + B;
+    C := ;
+    C := A + B
+
+    //--    PRINT       --//
+    PRINT(%Hola Mundo%);
+    PRINT%Hola Mundo%);
+    PRINT();
+    PRINT(%Hola Mundo%;
+    PRINT(%Hola Mundo!%)
+    PRINT(%Hola Mundo%);
+
+    //--    IF          --//
+    IF (A == 3) THEN
+        A := 5;
+    ELSE
+        A := 3;
+    ENDIF;
+
+    IF (A == 3)
+        A := 5;
+    ELSE
+        A := 3;
+    ENDIF;
+
+    IF (A == 3) THEN
+        A := 5;
+        A := 3;
+    ENDIF;
+
+    IF (A == 3) THEN
+    BEGIN
+        A := 5;
+    END
+    ELSE
+    BEGIN
+        A := 3;
+    
+    ENDIF
+
+    IF () THEN
+        A := 5;
+    ELSE
+        A := 3;
+    ENDIF;
+
+    IF A == 3) THEN
+        A := 5;
+    ELSE
+        A := 3;
+    ENDIF;
+
+    IF (A == 3 THEN
+        A := 5;
+    ELSE
+        A := 3;
+    ENDIF;
+
+    
+    //--    REPEAT      --//
+    REPEAT (Z := 0; Z <= 20; 10)
+        C := 18;
+
+    REPEAT Z := 0; Z <= 20; 10)
+        C := 18;
+
+    REPEAT ( := 0; Z <= 20; 10)
+        C := 18;
+
+    REPEAT (Z 0; Z <= 20; 10)
+        C := 18;
+
+    REPEAT (Z := ; Z <= 20; 10)
+        C := 18;
+
+    REPEAT (Z := 0 Z <= 20; 10)
+        C := 18;
+    
+    REPEAT (Z := 0;  <= 20; 10)
+        C := 18;
+
+    REPEAT (Z := 0; Z 20; 10)
+        C := 18;
+
+    REPEAT (Z := 0; Z <= ; 10)
+        C := 18;
+
+    REPEAT (Z := 0; Z <= 20 10)
+        C := 18;
+
+    REPEAT (Z := 0; Z <= 20; )
+        C := 18;
+
+    REPEAT (Z := 0; Z <= 20; 10
+        C := 18;
 END $
