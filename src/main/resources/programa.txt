@@ -2,7 +2,7 @@ INT a, b;
 
 FLOAT FUNC mi_funcion (INT b)
 INT a, b;
-
+BEGIN
     // comentario //
     REPEAT (I := 999; I <> M + 2; 5 )
     BEGIN
@@ -25,21 +25,13 @@ END;
 
 BEGIN
 
-    //-----     ERRORES     -----//
-    //--    ASIGNACION  --//
-    A := A + B;
-    := A + B;
-    C A + B;
-    C := ;
-    C := A + B
-
-    //--    PRINT       --//
-    PRINT(%Hola Mundo%);
-    PRINT%Hola Mundo%);
-    PRINT();
-    PRINT(%Hola Mundo%;
-    PRINT(%Hola Mundo!%)
-    PRINT(%Hola Mundo%);
+    //--    CASTEO      --//
+    A := INT(A);
+    A := INT(FLOAT(A));
+    A := INT(A + B);
+    A := INT(A*INT(b)+INT(d)+INT(INT(C)/INT(D)));
+    A := INT(INT(A*B) + INT(C+D));
+    A := INT(A + INT(C));
 
     //--    IF          --//
     IF (A == 3) THEN
@@ -58,16 +50,6 @@ BEGIN
         A := 5;
         A := 3;
     ENDIF;
-
-    IF (A == 3) THEN
-    BEGIN
-        A := 5;
-    END
-    ELSE
-    BEGIN
-        A := 3;
-    
-    ENDIF
 
     IF () THEN
         A := 5;
@@ -124,4 +106,19 @@ BEGIN
 
     REPEAT (Z := 0; Z <= 20; 10
         C := 18;
+    
+    //--    CONVERSION      --//
+    A := INT(4 + 3);
+    A := FLOAT(4 + 3);
+    A := INT(4 + A);
+    A := FLOAT(B + 3);
+    A := INT(B + A);
+    A := FLOAT(B + A);
+
+    IF (INT(A) == 3) THEN
+        A := 5;
+
+    IF (INT(A) == INT(3)) THEN
+        A := 5;
+
 END $

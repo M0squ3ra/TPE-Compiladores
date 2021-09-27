@@ -31,24 +31,38 @@ SENTENCIA_DECLARATIVA:          SENTENCIA_DECLARATIVA DECLARACION_VARIABLES
 			                    | SENTENCIA_DECLARATIVA DECLARACION_FUNC
 			                    | DECLARACION_VARIABLES
 			                    | DECLARACION_FUNC
+                                | ASIGNACION_FUNC_VAR
                 		        ;
 
-DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';'
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';'
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';'
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';'
+ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES ';'
+                                | ASIGNACION_FUNC_VAR_ERROR
+                                ;
+
+ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO ')' VARIABLES ';' {yyerror("Falta el tipo de la funcion.");}
+                                | TIPO error '('TIPO ')' VARIABLES ';' {yyerror("Falta la palabra reservada FUNC.");}
+                                | TIPO FUNC error TIPO ')' VARIABLES ';' {yyerror("Falta el primer parentesis en la asignacion de la funcion.");}
+                                | TIPO FUNC '(' error ')' VARIABLES ';' {yyerror("Falta el tipo del parametro en la asignacion de la funcion.");}
+                                | TIPO FUNC '('TIPO error VARIABLES ';' {yyerror("Falta el segundo parentesis en la asignacion de la funcion.");}
+                                | TIPO FUNC '('TIPO')' error ';' {yyerror("Falta el listado de variables en la asignacion de la funcion.");}
+                                | TIPO FUNC '('TIPO')' VARIABLES error {yyerror("Falta el ';' en la asignación de la función.");}
+                                ;
+                                
+DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
                                 | DECLARACION_FUNC_ERROR
                                 ;           
                     
-DECLARACION_FUNC_ERROR:         error FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';' {yyerror("Falta el tipo de la funcion.");}
-                                | TIPO error IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';'  {yyerror("Falta la palabra clave FUNC.");}
-                                | TIPO FUNC error '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';' {yyerror("Falta el identificador de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR error PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';' {yyerror("Falta el primer parentesis de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' error ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';' {yyerror("Falta el parametro de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO error DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';' {yyerror("Falta el segundo parentesis de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' error DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS '(' CONVERSION ')' ';' END ';' {yyerror("Falta el return de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES error CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' ';' END ';' {yyerror("Falta el BEGIN de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' CONVERSION ')' error ';' {yyerror("Falta el END de la funcion.");}
+DECLARACION_FUNC_ERROR:         error FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el tipo de la funcion.");}
+                                | TIPO error IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'  {yyerror("Falta la palabra clave FUNC.");}
+                                | TIPO FUNC error '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el identificador de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR error PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el primer parentesis de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' error ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el parametro de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO error DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el segundo parentesis de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' error DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS '(' EXPRESION ')' ';' END ';' {yyerror("Falta el return de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES error CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el BEGIN de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' error ';' {yyerror("Falta el END de la funcion.");}
                                 ;
 
 DECLARACION_VARIABLES:          TIPO VARIABLES ';'
@@ -80,8 +94,8 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';'
 				                | PRINT '(' CADENA ')' ';'
 				                | BREAK ';'
                                 | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';'
-				                | IF '(' CONDICION ')C' THEN BLOQUE_SENTENCIA ENDIF ';'
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CONSTANTE ';' CONDICION_REPEAT ';' CONSTANTE ')' BLOQUE_SENTENCIA
+				                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';'
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
                                 | IF_ERROR
@@ -89,7 +103,6 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';'
                                 ;
 
 ASIGNACION_ERROR:               error ASIGNACION EXPRESION ';' {yyerror("Falta el identificador de la asignación.");}
-                                | IDENTIFICADOR error EXPRESION ';' {yyerror("Falta el ':=' en la asignación.");}
                                 | IDENTIFICADOR ASIGNACION error ';' {yyerror("Falta la expresión en la asignación.");}
                                 | IDENTIFICADOR ASIGNACION EXPRESION error {yyerror("Falta el ';' en la asignación.");}
                                 ;
@@ -115,61 +128,36 @@ IF_ERROR:                       IF error CONDICION ')' THEN BLOQUE_SENTENCIA ELS
                                 | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF error {yyerror("Falta el ';' del IF.");}
                                 ;
 
-REPEAT_ERROR:                   REPEAT '(' error ASIGNACION CONSTANTE ';' CONDICION_REPEAT ';' CONSTANTE ')' BLOQUE_SENTENCIA {yyerror("Falta el identificador del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR error CONSTANTE ';' CONDICION_REPEAT ';' CONSTANTE ')' BLOQUE_SENTENCIA {yyerror("Falta el asignador al identificador del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION error ';' CONDICION_REPEAT ';' CONSTANTE ')' BLOQUE_SENTENCIA {yyerror("El identificador no tiene constante a asignar del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CONSTANTE error CONDICION_REPEAT ';' CONSTANTE ')' BLOQUE_SENTENCIA {yyerror("Falta ';' luego de la asignacion del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CONSTANTE ';' error ';' CONSTANTE ')' BLOQUE_SENTENCIA {yyerror("Falta la condicion para que cicle el bloque  del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CONSTANTE ';' CONDICION_REPEAT error CONSTANTE ')' BLOQUE_SENTENCIA  {yyerror("Falta ';' luego de la condicion del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CONSTANTE ';' CONDICION_REPEAT ';' error ')' BLOQUE_SENTENCIA  {yyerror("Falta la constante de iteracion del REPEAT.");}
-                                | REPEAT error IDENTIFICADOR ASIGNACION CONSTANTE ';' CONDICION_REPEAT ';' CONSTANTE ')' BLOQUE_SENTENCIA  {yyerror("Falta el primer paréntesis del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CONSTANTE ';' CONDICION_REPEAT ';' CONSTANTE error BLOQUE_SENTENCIA  {yyerror("Falta el segundo paréntesis del REPEAT.");}
+REPEAT_ERROR:                   REPEAT '(' error ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta el identificador del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR error CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta el asignador al identificador del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION error ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("El identificador no tiene constante a asignar del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE error CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta ';' luego de la asignacion del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' error ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta la condicion del ciclo del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT error CTE ')' BLOQUE_SENTENCIA  {yyerror("Falta ';' luego de la condicion del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' error ')' BLOQUE_SENTENCIA  {yyerror("Falta la constante de iteracion del REPEAT.");}
+                                | REPEAT error IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA  {yyerror("Falta el primer paréntesis del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE error BLOQUE_SENTENCIA  {yyerror("Falta el segundo paréntesis del REPEAT.");}
                                 ;
 
-CONDICION:                      CONDICION AND CONVERSION
-                                | CONDICION OR CONVERSION
-                                | CONDICION '>' CONVERSION
-                                | CONDICION '<' CONVERSION
-                                | CONDICION MAYOR_IGUAL CONVERSION
-                                | CONDICION MENOR_IGUAL CONVERSION
-                                | CONDICION IGUALDAD CONVERSION
-                                | CONDICION DIFERENTE CONVERSION
-                                | CONVERSION
-                                ;
-                
-CONDICION_REPEAT:               IDENTIFICADOR '>' CONVERSION
-                                | IDENTIFICADOR '<' CONVERSION
-		                        | IDENTIFICADOR MAYOR_IGUAL CONVERSION
-                                | IDENTIFICADOR MENOR_IGUAL CONVERSION
-		                        | IDENTIFICADOR IGUALDAD CONVERSION
-                                | IDENTIFICADOR DIFERENTE CONVERSION
-                                | CONDICION_REPEAT_ERROR
+CONDICION:                      CONDICION OPERADOR_LOGICO EXPRESION
+                                | CONDICION OPERADOR_COMPARADOR EXPRESION
+                                | EXPRESION
                                 ;
 
-CONDICION_REPEAT_ERROR:         IDENTIFICADOR error CONVERSION {yyerror("Falta el comparador.");}
+CONDICION_REPEAT:               IDENTIFICADOR OPERADOR_COMPARADOR EXPRESION
                                 ;
 
-CONVERSION:                     EXPRESION
-                                ;       
+CONVERSION:                     TIPO '(' EXPRESION ')'
+                                ;
 
 EXPRESION:                      EXPRESION '+' TERMINO
                                 | EXPRESION '-' TERMINO
                                 | TERMINO
-                                | EXPRESION_ERROR
                                 ;
 
-EXPRESION_ERROR:                EXPRESION '+' error {yyerror("Falta el segundo termino.");}
-                                | EXPRESION '-' error {yyerror("Falta el segundo termino.");}
-                                ;
-                                
-TERMINO:                        TERMINO '/' F
-                                | TERMINO '*' F
-                                | F
-                                | TERMINO_ERROR
-                                ;
-
-TERMINO_ERROR:                  TERMINO '*' error {yyerror("Falta un termino a multiplicar.");}
-                                | TERMINO '/' error {yyerror("Falta un termino a dividir.");}
+TERMINO:                        TERMINO '*' FACTOR
+                                | TERMINO '/' FACTOR
+                                | FACTOR
                                 ;
                                 
 PARAMETRO:                      TIPO IDENTIFICADOR
@@ -178,18 +166,28 @@ PARAMETRO:                      TIPO IDENTIFICADOR
                                 
 PARAMETRO_ERROR:                TIPO error {yyerror("Falta el identificador");}
                                 ;
-                
-F:                              IDENTIFICADOR   
-                                | CONSTANTE
-                                | IDENTIFICADOR '(' PARAMETRO ')'
-                                ;
 
-CONSTANTE:                      CTE {if (!checkRango($1.sval)){
+FACTOR:                         IDENTIFICADOR   
+                                | CTE {if (!checkRango($1.sval)){
                                         yyerror("Constante fuera de rango");
                                             }}
                                 | '-' CTE {lexico.cambiarSimboloConstante($2.sval);
 				                            $$ = new ParserVal("-" + $2.sval);
                                         }
+                                | CONVERSION
+                                | IDENTIFICADOR '(' PARAMETRO ')'
+                                ;
+
+OPERADOR_COMPARADOR:            '>'
+                                | '<'
+                                | MAYOR_IGUAL
+                                | MENOR_IGUAL
+                                | IGUALDAD
+                                | DIFERENTE
+                                ;
+
+OPERADOR_LOGICO:                AND
+                                | OR
                                 ;
 
 TIPO:                           FLOAT
@@ -238,6 +236,7 @@ TIPO:                           FLOAT
     public List<Error> getErroresSintacticos(){
         return erroresSintacticos;
     }
+
     
     public boolean checkRango(String lexema){
         if(lexico.getAtributosLexema(lexema).get("TIPO").equals("INT")){

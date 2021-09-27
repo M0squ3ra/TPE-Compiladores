@@ -24,7 +24,7 @@ public class Main {
 		parser.yyparse();
 
         // devuelve una lista pero yylex los reconoce a medida que se lo piden
-        System.out.println("\nTokens Reconocidos");
+        System.out.println("\nTokens Reconocidos (Orden -->)");
         for(Integer i: parser.getTokensReconocidos()){
             System.out.print(i + " ");
         }
