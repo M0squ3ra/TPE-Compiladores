@@ -10,6 +10,8 @@
 
 yacc.exe
 y.output
+Parser.java
+ParserVal.java
 
 
 # Default ignored files

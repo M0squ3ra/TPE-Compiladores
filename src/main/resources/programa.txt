@@ -132,6 +132,12 @@ BEGIN
         A := 5;
     ENDIF;
 
+    mi_funcion(INT (23));
+
+    A := mi_funcion(INT (23));
     
+    IF (mi_funcion(INT (23))) THEN
+        A := 5;
+    ENDIF;
 
 END $

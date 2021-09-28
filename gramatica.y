@@ -95,6 +95,7 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {printEst
                                 | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';' {printEstructura("Sentencia IF/ELSE");}
 				                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';' {printEstructura("Sentencia IF");}
                                 | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {printEstructura("Sentencia REPEAT");}
+                                | IDENTIFICADOR '(' EXPRESION ')' {printEstructura("Llamado a funcion");}
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
                                 | IF_ERROR
@@ -170,7 +171,7 @@ FACTOR:                         IDENTIFICADOR
 				                            $$ = new ParserVal("-" + $2.sval);
                                         }
                                 | CONVERSION
-                                | IDENTIFICADOR '(' PARAMETRO ')'
+                                | IDENTIFICADOR '(' EXPRESION ')' {printEstructura("Llamado a funcion como operando");}
                                 ;
 
 OPERADOR_COMPARADOR:            '>'
