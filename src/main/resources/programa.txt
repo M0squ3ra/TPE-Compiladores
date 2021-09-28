@@ -30,7 +30,7 @@ BEGIN
     INT FUNC (INT) a, b, c;
 
     //--    CASTEO      --//
-    A := INT(A);
+    Asakldladsnsadlnsasdasdads := INT(A);
     A := INT(FLOAT(A));
     A := INT(A + B);
     A := INT(A*INT(b)+INT(d)+INT(INT(C)/INT(D)));
