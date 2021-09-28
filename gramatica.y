@@ -30,12 +30,13 @@ PROGRAMA_ERROR:                 SENTENCIA_DECLARATIVA {yyerror("Bloque principal
                                 	
 SENTENCIA_DECLARATIVA:          SENTENCIA_DECLARATIVA DECLARACION_VARIABLES
 			                    | SENTENCIA_DECLARATIVA DECLARACION_FUNC
+                                | SENTENCIA_DECLARATIVA ASIGNACION_FUNC_VAR
 			                    | DECLARACION_VARIABLES
 			                    | DECLARACION_FUNC
                                 | ASIGNACION_FUNC_VAR
                 		        ;
 
-ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES ';'
+ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES ';' {printEstructura("Declaracion de varables");}
                                 | ASIGNACION_FUNC_VAR_ERROR
                                 ;
 
@@ -48,9 +49,9 @@ ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO ')' VARIABLES ';' {yyerror("F
                                 ;
                                 
 DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion sin declaración de variables ni PRE.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de función con PRE.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de función con PRE y sin declaración de variables.");}
                                 | DECLARACION_FUNC_ERROR
                                 ;           
                     

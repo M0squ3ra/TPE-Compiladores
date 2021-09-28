@@ -1,10 +1,13 @@
 Mi_Progama
 
 INT a, b;
+INT FUNC (INT) a, b, c;
+
 
 FLOAT FUNC mi_funcion (INT b)
 INT a, b;
 BEGIN
+    PRE: (x > 3), %HOLA%;
     // comentario //
     REPEAT (I := 999; I <> M + 2; 5 )
     BEGIN
@@ -25,9 +28,10 @@ BEGIN
     RETURN(a+b);
 END;
 
-BEGIN
-
-    INT FUNC (INT) a, b, c;
+BEGIN 
+    PRINT(%Cadena 1%);
+    A := INT(A + B);
+    PRINT(%Cadena%);
 
     //--    CASTEO      --//
     Asakldladsnsadlnsasdasdads := INT(A);
