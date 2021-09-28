@@ -17,8 +17,8 @@ public class Main {
     public static void main(String[] args) throws IOException{
 
         Lexico lexico = Lexico.getInstance();
-        // lexico.setData(Main.leerArchivo("src/main/resources/programa.txt"));
-        lexico.setData(Main.leerArchivo(args[0]));
+        lexico.setData(Main.leerArchivo("src/main/resources/programa.txt"));
+        // lexico.setData(Main.leerArchivo(args[0]));
         
         System.out.println("Estructuras detectadas, el numero de linea indica el final de la estructura");
         System.out.println("Las estructuras que contienen errores no se muestran");
