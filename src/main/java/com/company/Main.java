@@ -20,26 +20,31 @@ public class Main {
         // lexico.setData(Main.leerArchivo("src/main/resources/programa.txt"));
         lexico.setData(Main.leerArchivo(args[0]));
         
-        System.out.println("Estructuras detectadas, el numero de linea indica el final de la estructura");
-        System.out.println("Las estructuras que contienen errores no se muestran");
+        System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
+        System.out.println(" Las estructuras que contienen errores no se muestran");
+        System.out.println("*---------------------------------------------------------------------------*");
         Parser parser = new Parser(false);
 		parser.yyparse();
 
         // devuelve una lista pero yylex los reconoce a medida que se lo piden
-        System.out.println("\nTokens Reconocidos (Orden -->)");
+        System.out.println("\n Tokens Reconocidos (Orden -->)");
+        System.out.println("*------------------------------*");
         for(Integer i: parser.getTokensReconocidos()){
             System.out.print(i + " ");
         }
         
-        System.out.println("\n\nErrores Lexicos");
+        System.out.println("\n\n Errores Lexicos");
+        System.out.println("*---------------*");
         for(Error e: lexico.getErroresLexicos())
             System.out.println(e.toString());
         
-        System.out.println("\nErrores Sintacticos");
+        System.out.println("\n Errores Sintacticos");
+        System.out.println("*-------------------*");
         for(Error e: parser.getErroresSintacticos())
             System.out.println(e.toString());
 
-        System.out.println("\nContenido de la tabla de simbolos");
+        System.out.println("\n Contenido de la tabla de simbolos");
+        System.out.println("*---------------------------------*");
         Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
         for(String i: tablaSimbolos.keySet()){
             System.out.println(i);
