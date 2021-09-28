@@ -1,3 +1,5 @@
+Mi_Progama
+
 INT a, b;
 
 FLOAT FUNC mi_funcion (INT b)
@@ -10,7 +12,7 @@ BEGIN
     END
     A := 5;
     A := -6;
-    A := 6.1;
+    A := 6.1
     A := -7.S-1;
     A := 32768;
     A := -6000000000000000000000000000000;
@@ -24,6 +26,8 @@ BEGIN
 END;
 
 BEGIN
+
+    INT FUNC (INT) a, b, c;
 
     //--    CASTEO      --//
     A := INT(A);
@@ -72,6 +76,11 @@ BEGIN
     
     //--    REPEAT      --//
     REPEAT (Z := 0; Z <= 20; 10)
+    BEGIN
+        C := 18;
+    END
+
+    REPEAT (Z := 0; Z <= 20; 10)
         C := 18;
 
     REPEAT Z := 0; Z <= 20; 10)
@@ -117,8 +126,12 @@ BEGIN
 
     IF (INT(A) == 3) THEN
         A := 5;
+    ENDIF;
 
     IF (INT(A) == INT(3)) THEN
         A := 5;
+    ENDIF;
+
+    
 
 END $

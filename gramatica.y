@@ -17,14 +17,15 @@
 
 %%
 
-PROGRAMA:                       SENTENCIA_DECLARATIVA BEGIN CONJUNTO_SENTENCIAS END
-                                | BEGIN CONJUNTO_SENTENCIAS END
+PROGRAMA:                       IDENTIFICADOR SENTENCIA_DECLARATIVA BEGIN CONJUNTO_SENTENCIAS END 
+                                | IDENTIFICADOR BEGIN CONJUNTO_SENTENCIAS END
                                 | PROGRAMA_ERROR
 				                ;
 
 PROGRAMA_ERROR:                 SENTENCIA_DECLARATIVA {yyerror("Bloque principal no especificado.");}
                                 | SENTENCIA_DECLARATIVA BLOQUE_SENTENCIA END {yyerror("BEGIN del bloque principal no especificado.");}
                                 | SENTENCIA_DECLARATIVA BEGIN BLOQUE_SENTENCIA {yyerror("END del bloque principal no especificado.");}
+                                | error SENTENCIA_DECLARATIVA BEGIN CONJUNTO_SENTENCIAS END {yyerror("Falta el nombre del programa.");}
                                 ;
                                 	
 SENTENCIA_DECLARATIVA:          SENTENCIA_DECLARATIVA DECLARACION_VARIABLES
@@ -44,13 +45,12 @@ ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO ')' VARIABLES ';' {yyerror("F
                                 | TIPO FUNC '(' error ')' VARIABLES ';' {yyerror("Falta el tipo del parametro en la asignacion de la funcion.");}
                                 | TIPO FUNC '('TIPO error VARIABLES ';' {yyerror("Falta el segundo parentesis en la asignacion de la funcion.");}
                                 | TIPO FUNC '('TIPO')' error ';' {yyerror("Falta el listado de variables en la asignacion de la funcion.");}
-                                | TIPO FUNC '('TIPO')' VARIABLES error {yyerror("Falta el ';' en la asignación de la función.");}
                                 ;
                                 
-DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'
+DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
                                 | DECLARACION_FUNC_ERROR
                                 ;           
                     
@@ -65,19 +65,18 @@ DECLARACION_FUNC_ERROR:         error FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLA
                                 | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' error ';' {yyerror("Falta el END de la funcion.");}
                                 ;
 
-DECLARACION_VARIABLES:          TIPO VARIABLES ';'
+DECLARACION_VARIABLES:          TIPO VARIABLES ';' {printEstructura("Declaracion de varables");}
                                 | DECLARACION_VARIABLES_ERROR
                                 ;
 
 DECLARACION_VARIABLES_ERROR:    TIPO error ';' {yyerror("Variables mal declaradas.");}
-                                | TIPO VARIABLES error {yyerror("Falta el ';' en la declaracion de variables.");}
                                 ;
 
 VARIABLES:                      VARIABLES ',' IDENTIFICADOR
 				                | IDENTIFICADOR
                                 ;
                 
-BLOQUE_SENTENCIA:               BEGIN CONJUNTO_SENTENCIAS END
+BLOQUE_SENTENCIA:               BEGIN CONJUNTO_SENTENCIAS END {printEstructura("Bloque de sentencias con BEGIN/END");}
                                 | SENTENCIA_EJECUTABLE
                                 | BLOQUE_SENTENCIA_ERROR
                                 ;
@@ -90,12 +89,12 @@ CONJUNTO_SENTENCIAS:            CONJUNTO_SENTENCIAS SENTENCIA_EJECUTABLE
                                 | SENTENCIA_EJECUTABLE
                                 ;
 
-SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';'
-				                | PRINT '(' CADENA ')' ';'
-				                | BREAK ';'
-                                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';'
-				                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';'
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA
+SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {printEstructura("Asignacion");}
+				                | PRINT '(' CADENA ')' ';' {printEstructura("PRINT");}
+				                | BREAK ';' {printEstructura("BREAK");}
+                                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';' {printEstructura("Sentencia IF/ELSE");}
+				                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';' {printEstructura("Sentencia IF");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {printEstructura("Sentencia REPEAT");}
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
                                 | IF_ERROR
@@ -104,13 +103,11 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';'
 
 ASIGNACION_ERROR:               error ASIGNACION EXPRESION ';' {yyerror("Falta el identificador de la asignación.");}
                                 | IDENTIFICADOR ASIGNACION error ';' {yyerror("Falta la expresión en la asignación.");}
-                                | IDENTIFICADOR ASIGNACION EXPRESION error {yyerror("Falta el ';' en la asignación.");}
                                 ;
 
 PRINT_ERROR:                    PRINT CADENA ')' ';' {yyerror("Falta el primer paréntesis del PRINT.");}
                                 | PRINT '(' ')' ';' {yyerror("Falta la cadena del PRINT.");}
                                 | PRINT '(' CADENA ';' {yyerror("Falta el último paréntesis del PRINT.");}
-                                | PRINT '(' CADENA ')' {yyerror("Falta el ';' del PRINT.");}
                                 ;
 
 IF_ERROR:                       IF error CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta el primer paréntesis de la condición del IF.");}
@@ -119,21 +116,19 @@ IF_ERROR:                       IF error CONDICION ')' THEN BLOQUE_SENTENCIA ELS
                                 | IF '(' CONDICION ')' error BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta el THEN del IF.");}
                                 | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA error BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta el ELSE del IF.");}
                                 | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA error ';' {yyerror("Falta el ENDIF del IF.");}
-                                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF error {yyerror("Falta el ';' del IF.");}
                                 | IF error CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta el primer paréntesiis de la condición del IF.");}
                                 | IF '(' error ')' THEN BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta la condición del IF.");}
                                 | IF '(' CONDICION error THEN BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta el último paréntesis de la condición del IF.");}
                                 | IF '(' CONDICION ')' error BLOQUE_SENTENCIA ENDIF ';' {yyerror("Falta el THEN del IF.");}
                                 | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA error ';' {yyerror("Falta el ENDIF del IF.");}
-                                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF error {yyerror("Falta el ';' del IF.");}
                                 ;
 
 REPEAT_ERROR:                   REPEAT '(' error ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta el identificador del REPEAT.");}
                                 | REPEAT '(' IDENTIFICADOR error CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta el asignador al identificador del REPEAT.");}
                                 | REPEAT '(' IDENTIFICADOR ASIGNACION error ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("El identificador no tiene constante a asignar del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE error CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta ';' luego de la asignacion del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE  CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta ';' luego de la asignacion del REPEAT.");}
                                 | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' error ';' CTE ')' BLOQUE_SENTENCIA {yyerror("Falta la condicion del ciclo del REPEAT.");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT error CTE ')' BLOQUE_SENTENCIA  {yyerror("Falta ';' luego de la condicion del REPEAT.");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT  CTE ')' BLOQUE_SENTENCIA  {yyerror("Falta ';' luego de la condicion del REPEAT.");}
                                 | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' error ')' BLOQUE_SENTENCIA  {yyerror("Falta la constante de iteracion del REPEAT.");}
                                 | REPEAT error IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA  {yyerror("Falta el primer paréntesis del REPEAT.");}
                                 | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE error BLOQUE_SENTENCIA  {yyerror("Falta el segundo paréntesis del REPEAT.");}
@@ -246,4 +241,9 @@ TIPO:                           FLOAT
                 return false;
         }
         return true;
+    }
+    
+    public void printEstructura(String s){
+        System.out.print(String.format("%-15s", "[Linea "+String.valueOf(lexico.getLinea())+"]"));
+        System.out.println(s);
     }

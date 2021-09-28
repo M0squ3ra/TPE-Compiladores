@@ -9,6 +9,8 @@
 .factorypath
 
 yacc.exe
+y.output
+
 
 # Default ignored files
 /shelf/
