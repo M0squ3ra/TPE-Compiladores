@@ -688,6 +688,7 @@ final static String yyrule[] = {
     private Lexico lexico = Lexico.getInstance();
     private List<Error> erroresSintacticos = new ArrayList<Error>(); 
     private List<Integer> tokensReconocidos = new ArrayList<Integer>(); 
+    private List<String> estructurasReconocidas = new ArrayList<String>();
 
     public static void main(String args[]){
         
@@ -725,6 +726,9 @@ final static String yyrule[] = {
         return erroresSintacticos;
     }
 
+    public List<String> getEstructurasReconocidas(){
+        return estructurasReconocidas;
+    }
     
     public boolean checkRango(String lexema){
         if(lexico.getAtributosLexema(lexema).get("TIPO").equals("INT")){
@@ -736,11 +740,10 @@ final static String yyrule[] = {
         return true;
     }
     
-    public void printEstructura(String s){
-        System.out.print(String.format("%-15s", "[Linea "+String.valueOf(lexico.getLinea())+"]"));
-        System.out.println(s);
+    public void addEstructura(String s){
+        estructurasReconocidas.add(String.format("%-15s", "[Linea "+String.valueOf(lexico.getLinea())+"]") + s);
     }
-//#line 673 "Parser.java"
+//#line 676 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -912,7 +915,7 @@ case 7:
 break;
 case 14:
 //#line 39 "gramatica.y"
-{printEstructura("Declaracion de varables");}
+{addEstructura("Declaracion de varables");}
 break;
 case 16:
 //#line 43 "gramatica.y"
@@ -940,19 +943,19 @@ case 21:
 break;
 case 22:
 //#line 51 "gramatica.y"
-{printEstructura("Declaracion de funcion");}
+{addEstructura("Declaracion de funcion");}
 break;
 case 23:
 //#line 52 "gramatica.y"
-{printEstructura("Declaracion de funcion sin declaración de variables ni PRE.");}
+{addEstructura("Declaracion de funcion sin declaración de variables ni PRE");}
 break;
 case 24:
 //#line 53 "gramatica.y"
-{printEstructura("Declaracion de función con PRE.");}
+{addEstructura("Declaracion de función con PRE.");}
 break;
 case 25:
 //#line 54 "gramatica.y"
-{printEstructura("Declaracion de función con PRE y sin declaración de variables.");}
+{addEstructura("Declaracion de función con PRE y sin declaración de variables.");}
 break;
 case 27:
 //#line 58 "gramatica.y"
@@ -992,7 +995,7 @@ case 35:
 break;
 case 36:
 //#line 69 "gramatica.y"
-{printEstructura("Declaracion de varables");}
+{addEstructura("Declaracion de varables");}
 break;
 case 38:
 //#line 73 "gramatica.y"
@@ -1000,7 +1003,7 @@ case 38:
 break;
 case 41:
 //#line 80 "gramatica.y"
-{printEstructura("Bloque de sentencias con BEGIN/END");}
+{addEstructura("Bloque de sentencias con BEGIN/END");}
 break;
 case 44:
 //#line 85 "gramatica.y"
@@ -1012,31 +1015,31 @@ case 45:
 break;
 case 48:
 //#line 93 "gramatica.y"
-{printEstructura("Asignacion");}
+{addEstructura("Asignacion");}
 break;
 case 49:
 //#line 94 "gramatica.y"
-{printEstructura("PRINT");}
+{addEstructura("Sentencia PRINT");}
 break;
 case 50:
 //#line 95 "gramatica.y"
-{printEstructura("BREAK");}
+{addEstructura("BREAK");}
 break;
 case 51:
 //#line 96 "gramatica.y"
-{printEstructura("Sentencia IF/ELSE");}
+{addEstructura("Sentencia IF/ELSE");}
 break;
 case 52:
 //#line 97 "gramatica.y"
-{printEstructura("Sentencia IF");}
+{addEstructura("Sentencia IF");}
 break;
 case 53:
 //#line 98 "gramatica.y"
-{printEstructura("Sentencia REPEAT");}
+{addEstructura("Sentencia REPEAT");}
 break;
 case 54:
 //#line 99 "gramatica.y"
-{printEstructura("Llamado a funcion");}
+{addEstructura("Llamado a funcion");}
 break;
 case 59:
 //#line 106 "gramatica.y"
@@ -1156,9 +1159,9 @@ case 100:
 break;
 case 102:
 //#line 175 "gramatica.y"
-{printEstructura("Llamado a funcion como operando");}
+{addEstructura("Llamado a funcion como operando");}
 break;
-//#line 1086 "Parser.java"
+//#line 1089 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

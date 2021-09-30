@@ -36,7 +36,7 @@ SENTENCIA_DECLARATIVA:          SENTENCIA_DECLARATIVA DECLARACION_VARIABLES
                                 | ASIGNACION_FUNC_VAR
                 		        ;
 
-ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES ';' {printEstructura("Declaracion de varables");}
+ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES ';' {addEstructura("Declaracion de varables");}
                                 | ASIGNACION_FUNC_VAR_ERROR
                                 ;
 
@@ -48,10 +48,10 @@ ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO ')' VARIABLES ';' {yyerror("F
                                 | TIPO FUNC '('TIPO')' error ';' {yyerror("Falta el listado de variables en la asignacion de la funcion.");}
                                 ;
                                 
-DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de funcion sin declaración de variables ni PRE.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de función con PRE.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {printEstructura("Declaracion de función con PRE y sin declaración de variables.");}
+DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de funcion");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de funcion sin declaración de variables ni PRE");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de función con PRE.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de función con PRE y sin declaración de variables.");}
                                 | DECLARACION_FUNC_ERROR
                                 ;           
                     
@@ -66,7 +66,7 @@ DECLARACION_FUNC_ERROR:         error FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLA
                                 | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' error ';' {yyerror("Falta el END de la funcion.");}
                                 ;
 
-DECLARACION_VARIABLES:          TIPO VARIABLES ';' {printEstructura("Declaracion de varables");}
+DECLARACION_VARIABLES:          TIPO VARIABLES ';' {addEstructura("Declaracion de varables");}
                                 | DECLARACION_VARIABLES_ERROR
                                 ;
 
@@ -77,7 +77,7 @@ VARIABLES:                      VARIABLES ',' IDENTIFICADOR
 				                | IDENTIFICADOR
                                 ;
                 
-BLOQUE_SENTENCIA:               BEGIN CONJUNTO_SENTENCIAS END {printEstructura("Bloque de sentencias con BEGIN/END");}
+BLOQUE_SENTENCIA:               BEGIN CONJUNTO_SENTENCIAS END {addEstructura("Bloque de sentencias con BEGIN/END");}
                                 | SENTENCIA_EJECUTABLE
                                 | BLOQUE_SENTENCIA_ERROR
                                 ;
@@ -90,13 +90,13 @@ CONJUNTO_SENTENCIAS:            CONJUNTO_SENTENCIAS SENTENCIA_EJECUTABLE
                                 | SENTENCIA_EJECUTABLE
                                 ;
 
-SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {printEstructura("Asignacion");}
-				                | PRINT '(' CADENA ')' ';' {printEstructura("PRINT");}
-				                | BREAK ';' {printEstructura("BREAK");}
-                                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';' {printEstructura("Sentencia IF/ELSE");}
-				                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';' {printEstructura("Sentencia IF");}
-                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {printEstructura("Sentencia REPEAT");}
-                                | IDENTIFICADOR '(' EXPRESION ')' ';' {printEstructura("Llamado a funcion");}
+SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {addEstructura("Asignacion");}
+				                | PRINT '(' CADENA ')' ';' {addEstructura("Sentencia PRINT");}
+				                | BREAK ';' {addEstructura("BREAK");}
+                                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ELSE BLOQUE_SENTENCIA ENDIF ';' {addEstructura("Sentencia IF/ELSE");}
+				                | IF '(' CONDICION ')' THEN BLOQUE_SENTENCIA ENDIF ';' {addEstructura("Sentencia IF");}
+                                | REPEAT '(' IDENTIFICADOR ASIGNACION CTE ';' CONDICION_REPEAT ';' CTE ')' BLOQUE_SENTENCIA {addEstructura("Sentencia REPEAT");}
+                                | IDENTIFICADOR '(' EXPRESION ')' ';' {addEstructura("Llamado a funcion");}
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
                                 | IF_ERROR
@@ -172,7 +172,7 @@ FACTOR:                         IDENTIFICADOR
 				                            $$ = new ParserVal("-" + $2.sval);
                                         }
                                 | CONVERSION
-                                | IDENTIFICADOR '(' EXPRESION ')' {printEstructura("Llamado a funcion como operando");}
+                                | IDENTIFICADOR '(' EXPRESION ')' {addEstructura("Llamado a funcion como operando");}
                                 ;
 
 OPERADOR_COMPARADOR:            '>'
@@ -197,6 +197,7 @@ TIPO:                           FLOAT
     private Lexico lexico = Lexico.getInstance();
     private List<Error> erroresSintacticos = new ArrayList<Error>(); 
     private List<Integer> tokensReconocidos = new ArrayList<Integer>(); 
+    private List<String> estructurasReconocidas = new ArrayList<String>();
 
     public static void main(String args[]){
         
@@ -234,6 +235,9 @@ TIPO:                           FLOAT
         return erroresSintacticos;
     }
 
+    public List<String> getEstructurasReconocidas(){
+        return estructurasReconocidas;
+    }
     
     public boolean checkRango(String lexema){
         if(lexico.getAtributosLexema(lexema).get("TIPO").equals("INT")){
@@ -245,7 +249,6 @@ TIPO:                           FLOAT
         return true;
     }
     
-    public void printEstructura(String s){
-        System.out.print(String.format("%-15s", "[Linea "+String.valueOf(lexico.getLinea())+"]"));
-        System.out.println(s);
+    public void addEstructura(String s){
+        estructurasReconocidas.add(String.format("%-15s", "[Linea "+String.valueOf(lexico.getLinea())+"]") + s);
     }
