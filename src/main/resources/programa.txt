@@ -13,9 +13,10 @@ BEGIN
     BEGIN
         Z := 6;
     END
+
     A := 5;
     A := -6;
-    A := 6.1
+    A := 6.1;
     A := -7.S-1;
     A := 32768;
     A := -6000000000000000000000000000000;
@@ -29,6 +30,9 @@ BEGIN
 END;
 
 BEGIN 
+    // A continuacion se agregan estructuras validas
+       junto con algunos errores posibles//
+
     PRINT(%Cadena 1%);
     A := INT(A + B);
     PRINT(%Cadena%);
