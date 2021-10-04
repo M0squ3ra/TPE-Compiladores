@@ -48,22 +48,26 @@ ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO ')' VARIABLES ';' {yyerror("F
                                 | TIPO FUNC '('TIPO')' error ';' {yyerror("Falta el listado de variables en la asignacion de la funcion.");}
                                 ;
                                 
-DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de funcion");}
+DECLARACION_FUNC:               TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de funcion");}
                                 | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de funcion sin declaración de variables ni PRE");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de función con PRE.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de función con PRE.");}
                                 | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' BEGIN PRE ':' '(' CONDICION ')' ',' CADENA ';' CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {addEstructura("Declaracion de función con PRE y sin declaración de variables.");}
                                 | DECLARACION_FUNC_ERROR
                                 ;           
                     
-DECLARACION_FUNC_ERROR:         error FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el tipo de la funcion.");}
-                                | TIPO error IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'  {yyerror("Falta la palabra clave FUNC.");}
-                                | TIPO FUNC error '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el identificador de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR error PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el primer parentesis de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' error ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el parametro de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO error DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el segundo parentesis de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' error DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS '(' EXPRESION ')' ';' END ';' {yyerror("Falta el return de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES error CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el BEGIN de la funcion.");}
-                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACION_VARIABLES BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' error ';' {yyerror("Falta el END de la funcion.");}
+DECLARACION_FUNC_ERROR:         error FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el tipo de la funcion.");}
+                                | TIPO error IDENTIFICADOR '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';'  {yyerror("Falta la palabra clave FUNC.");}
+                                | TIPO FUNC error '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el identificador de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR error PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el primer parentesis de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' error ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el parametro de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO error DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el segundo parentesis de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' error DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS '(' EXPRESION ')' ';' END ';' {yyerror("Falta el return de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC error CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' ';' END ';' {yyerror("Falta el BEGIN de la funcion.");}
+                                | TIPO FUNC IDENTIFICADOR '(' PARAMETRO ')' DECLARACIONES_VAR_FUNC BEGIN CONJUNTO_SENTENCIAS RETURN '(' EXPRESION ')' error ';' {yyerror("Falta el END de la funcion.");}
+                                ;
+
+DECLARACIONES_VAR_FUNC:         DECLARACIONES_VAR_FUNC DECLARACION_VARIABLES
+                                | DECLARACION_VARIABLES
                                 ;
 
 DECLARACION_VARIABLES:          TIPO VARIABLES ';' {addEstructura("Declaracion de varables");}

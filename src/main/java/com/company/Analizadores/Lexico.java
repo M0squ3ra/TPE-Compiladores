@@ -176,24 +176,24 @@ public class Lexico {
         Character c;
         Integer estado = 0;
         Integer token = null;
-        
+
         while(token == null){
                             
             c = getSimboloEntrada();
+
+            if (c == null) {
+                Error error = new Error("Error de sintaxis. Programa mal finalizado.", false, Lexico.linea);
+                Lexico.errores.add(error);
+                return 0;
+            }
 
             AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][getColumnaSimbolo(c)];
             token = as.aplicarAccionSemantica(c);
 
             estado = matrizTransicion[estado][getColumnaSimbolo(c)];
             
-            if (estado == -1){
-                estado = 0;
-                Error error = new Error("Error de sintaxis.", false, Lexico.linea);
-                Lexico.errores.add(error);
-                
+            if (estado == -1)
                 token = TokensID.ERROR;
-            }
-
             
         }
         return token;
