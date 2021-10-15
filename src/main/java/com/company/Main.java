@@ -10,6 +10,7 @@ import java.util.Map;
 import com.company.Analizadores.Lexico;
 import com.company.Analizadores.Parser;
 import com.company.Util.Error;
+import com.company.Util.Terceto;
 
 
 public class Main {
@@ -17,45 +18,55 @@ public class Main {
     public static void main(String[] args) throws IOException{
 
         Lexico lexico = Lexico.getInstance();
-        // lexico.setData(Main.leerArchivo("src/main/resources/programa.txt"));
-        lexico.setData(Main.leerArchivo(args[0]));
+        lexico.setData(Main.leerArchivo("src/main/resources/programa.txt"));
+        // lexico.setData(Main.leerArchivo(args[0]));
         
         Parser parser = new Parser(false);
 		parser.yyparse();
 
-        System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
-        System.out.println(" Las estructuras que contienen errores no se muestran");
-        System.out.println("*---------------------------------------------------------------------------*");
-        for(String i: parser.getEstructurasReconocidas()){
-            System.out.println(i);
-        }
+        // System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
+        // System.out.println(" Las estructuras que contienen errores no se muestran");
+        // System.out.println("*---------------------------------------------------------------------------*");
+        // for(String i: parser.getEstructurasReconocidas()){
+        //     System.out.println(i);
+        // }
 
-        // devuelve una lista pero yylex los reconoce a medida que se lo piden
-        System.out.println("\n Tokens Reconocidos (Orden -->)");
-        System.out.println("*------------------------------*");
-        for(Integer i: parser.getTokensReconocidos()){
-            System.out.print(i + " ");
-        }
+        // // devuelve una lista pero yylex los reconoce a medida que se lo piden
+        // System.out.println("\n Tokens Reconocidos (Orden -->)");
+        // System.out.println("*------------------------------*");
+        // for(Integer i: parser.getTokensReconocidos()){
+        //     System.out.print(i + " ");
+        // }
         
-        System.out.println("\n\n Errores Lexicos");
-        System.out.println("*---------------*");
-        for(Error e: lexico.getErroresLexicos())
-            System.out.println(e.toString());
+        // System.out.println("\n\n Errores Lexicos");
+        // System.out.println("*---------------*");
+        // for(Error e: lexico.getErroresLexicos())
+        //     System.out.println(e.toString());
         
         System.out.println("\n Errores Sintacticos");
         System.out.println("*-------------------*");
         for(Error e: parser.getErroresSintacticos())
             System.out.println(e.toString());
 
+        System.out.println("\n Errores Semanticos");
+        System.out.println("*-------------------*");
+        for(Error e: parser.getErroresSemanticos())
+            System.out.println(e.toString());
+
         System.out.println("\n Contenido de la tabla de simbolos");
         System.out.println("*---------------------------------*");
         Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
         for(String i: tablaSimbolos.keySet()){
-            System.out.println(i);
+            System.out.println("[" + i + "]:");
             Map<String, Object> atributos = tablaSimbolos.get(i);
             for(String j: atributos.keySet())
                 System.out.println("    " + j + ": " + atributos.get(j));
         }
+
+        System.out.println("\n Tercetos");
+        System.out.println("*-------------------*");
+        for(Terceto t: parser.getTercetos())
+            System.out.println(t.toString());
 
     }
 

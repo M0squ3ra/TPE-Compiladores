@@ -8,6 +8,7 @@
 .settings
 .factorypath
 
+yacc.*
 yacc.exe
 y.output
 Parser.java

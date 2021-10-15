@@ -41,7 +41,7 @@ public class AccionSemantica4 implements AccionSemantica {
             } else {
                 // caso en que el lexema no se encuentra en la tabla de símbolos.
                 Map<String, Object> propiedadesLexema = new HashMap<String, Object>();
-                propiedadesLexema.put("TIPO", "ID");
+                //propiedadesLexema.put("TIPO", "ID");
 
                 // almacenar otras propiedades.
                 if (buffer.length() > Lexico.TAMANO_BUFFER){

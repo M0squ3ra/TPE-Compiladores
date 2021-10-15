@@ -271,5 +271,11 @@ public class Lexico {
         Map<String,Object> atributos = getAtributosLexema(lexema);
         Lexico.tablaSimbolos.remove(lexema);
         Lexico.tablaSimbolos.put("-"+lexema, atributos);
-    }    
+    }
+    
+    public void addAmbitoIdentificador(String lexema, String ambito){
+        Map<String,Object> atributos = getAtributosLexema(lexema);
+        Lexico.tablaSimbolos.put(lexema + ambito, atributos);   
+        Lexico.tablaSimbolos.remove(lexema);
+    }
 }
