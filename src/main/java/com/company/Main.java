@@ -24,12 +24,12 @@ public class Main {
         Parser parser = new Parser(false);
 		parser.yyparse();
 
-        // System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
-        // System.out.println(" Las estructuras que contienen errores no se muestran");
-        // System.out.println("*---------------------------------------------------------------------------*");
-        // for(String i: parser.getEstructurasReconocidas()){
-        //     System.out.println(i);
-        // }
+        System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
+        System.out.println(" Las estructuras que contienen errores no se muestran");
+        System.out.println("*---------------------------------------------------------------------------*");
+        for(String i: parser.getEstructurasReconocidas()){
+            System.out.println(i);
+        }
 
         // // devuelve una lista pero yylex los reconoce a medida que se lo piden
         // System.out.println("\n Tokens Reconocidos (Orden -->)");
@@ -38,10 +38,10 @@ public class Main {
         //     System.out.print(i + " ");
         // }
         
-        // System.out.println("\n\n Errores Lexicos");
-        // System.out.println("*---------------*");
-        // for(Error e: lexico.getErroresLexicos())
-        //     System.out.println(e.toString());
+        System.out.println("\n\n Errores Lexicos");
+        System.out.println("*---------------*");
+        for(Error e: lexico.getErroresLexicos())
+            System.out.println(e.toString());
         
         System.out.println("\n Errores Sintacticos");
         System.out.println("*-------------------*");
@@ -63,10 +63,11 @@ public class Main {
                 System.out.println("    " + j + ": " + atributos.get(j));
         }
 
-        System.out.println("\n Tercetos");
+        System.out.println("\n Tercetos - [Nro.Terceto][Tipo](Terceto)");
         System.out.println("*-------------------*");
-        for(Terceto t: parser.getTercetos())
-            System.out.println(t.toString());
+        List<Terceto> tercetos = parser.getTercetos();
+        for(Terceto t: tercetos)
+            System.out.println("[" +tercetos.indexOf(t) + "] " + t.toString());
 
     }
 

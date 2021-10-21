@@ -37,7 +37,7 @@ public class AccionSemantica5 implements AccionSemantica {
 
             // agregado de la constante a la tabla de símbolos
             Map<String, Object> atributos = new HashMap<String, Object>();
-            atributos.put("TIPO", "FLOAT");
+            atributos.put("TIPO", "SINGLE");
             lexico.addLexemaTablaSimbolos(atributos);
 
             return TokensID.CTE;

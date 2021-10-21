@@ -1,5 +1,8 @@
 package com.company.Util;
 
+import com.company.Analizadores.Lexico;
+import com.company.Analizadores.Parser;
+
 public class Terceto {
     public String operador;
     public String operando1;
@@ -35,6 +38,11 @@ public class Terceto {
         this.tipo = tipo;
     }
 
+    
+    public String getTipo(){
+        return this.tipo;
+    }
+    
     public String getOperador(){
         return this.operador;
     }
@@ -47,9 +55,6 @@ public class Terceto {
         return this.operando2;
     }
 
-    public String getTipo(){
-        return this.tipo;
-    }
 
     public void setOperador(String o){
         this.operador = o;

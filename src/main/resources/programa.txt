@@ -1,53 +1,25 @@
-Mi_Progama
+Mi_Progama;
 
-FLOAT a, b, c, a;
+INT a, m, i;
+SINGLE b;
 
-INT a;
-
-INT FUNC (FLOAT) func_a, func_b;
-
-INT FUNC my_func (INT param)
-INT x, y;
-FLOAT y;
 BEGIN
-    IF (x > y) THEN
-    BEGIN
-        x := x * 2;
-        y := y / 2;
-    END
+
+//
+    IF (5 > 2) THEN
+        a := 5;
     ENDIF;
-    RETURN (x + y);
-END;
-
-INT FUNC my_func (INT param)
-BEGIN
-    RETURN (5);
-END;
-
-INT FUNC my_func2 (INT param)
-INT my_func2;
-BEGIN
-    RETURN (5);
-END;
-
-
-BEGIN
-
-    IF (a + b > c) THEN
-    BEGIN
-        a := 4;
-        b := 3;
-    END
-    ELSE
-        c := 3;
-    ENDIF;
-
-    REPEAT (a := 3; a < b; 5)
-    BEGIN
-        b := b - 1;
-    END
-
+    
     b := 5;
-    a := my_func(2);
+    a := b + 5;
+    a := 5 + b;//
+
+    REPEAT (a := 1; i < m; 99)
+    BEGIN
+        m := 4;
+    END
+
+
+    a := 4;
 
 END $

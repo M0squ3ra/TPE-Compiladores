@@ -46,7 +46,6 @@ public class TokensID {
         put("SINGLE",279);
         put("REPEAT",280);
         put("PRE",281);
-        put("FLOAT",282);
     }};
 
     public static Integer getTokenPalabraReservada(String s){
