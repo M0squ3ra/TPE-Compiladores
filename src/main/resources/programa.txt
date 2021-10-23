@@ -3,6 +3,20 @@ Mi_Progama;
 INT a, m, i;
 SINGLE b;
 
+INT FUNC myfunc(SINGLE a)
+    INT FUNC myfuncAnidada(SINGLE a)
+    BEGIN
+        a := 2.1;
+        RETURN(2);
+    END;
+BEGIN
+    PRE: (a < m), %PRECONDICION NO CUMPLIDA%;
+    a := 3.1;
+    m := 4;
+    RETURN(2);
+END;
+
+
 BEGIN
 
 //
@@ -12,14 +26,13 @@ BEGIN
     
     b := 5;
     a := b + 5;
-    a := 5 + b;//
+    a := 5 + b;
 
     REPEAT (a := 1; i < m; 99)
     BEGIN
         m := 4;
-    END
+    END//
 
-
-    a := 4;
+    a := myfunc(2.1);
 
 END $

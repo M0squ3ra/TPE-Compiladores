@@ -65,14 +65,28 @@ DECLARACION_FUNC:               ENCABEZADO_FUNC SENTENCIA_DECLARATIVA CUERPO_FUN
 
 CUERPO_FUNC:                    BEGIN CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';'
                                 | BEGIN RETURN_FUNC ';' END ';'
-                                | BEGIN PRECONDICION_FUNC CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';'
-                                | BEGIN PRECONDICION_FUNC RETURN_FUNC ';' END ';'
+                                | BEGIN PRECONDICION_FUNC CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';' {
+                                    Terceto bifurcacionIncondicional = backpatching.pop();
+                                    bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
+                                }
+                                | BEGIN PRECONDICION_FUNC RETURN_FUNC ';' END ';' {
+                                    Terceto bifurcacionIncondicional = backpatching.pop();
+                                    bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
+                                }
+                                ;
+    
+RETURN_FUNC:                    RETURN '(' EXPRESION ')' {checkRetornoFuncion($3.sval); addTerceto(new Terceto("RETURN_FUNC", $3.sval, null, getTipo($3.sval)));}
                                 ;
 
-RETURN_FUNC:                    RETURN '(' EXPRESION ')'
-                                ;
-
-PRECONDICION_FUNC:              PRE ':' '(' CONDICION ')' ',' CADENA ';'
+PRECONDICION_FUNC:              PRE ':' '(' CONDICION ')' ',' CADENA ';' {
+                                        Terceto bifurcacionTrue = new Terceto("BT", $4.sval, null);
+                                        addTerceto(bifurcacionTrue);
+                                        addTerceto(new Terceto("PRINT", $7.sval));
+                                        Terceto bifurcacionIncondicional = new Terceto("BI", null);
+                                        addTerceto(bifurcacionIncondicional);
+                                        backpatching.push(bifurcacionIncondicional);
+                                        bifurcacionTrue.setOperando2("[" + tercetos.size() + "]");
+                                        }
                                 ;
 
 ENCABEZADO_FUNC:                TIPO FUNC IDENTIFICADOR {addAtributoLexema($3.sval,"TIPO",$1.sval); verificarRedeclaracion($3.sval, "ID_FUNC"); ambitoActual.add(0, $3.sval);} '(' PARAMETRO ')' 
@@ -131,7 +145,7 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {
 				                | BREAK ';' {addEstructura("BREAK"); addTerceto(new Terceto("BREAK"));}
                                 | SENTENCIA_IF
                                 | SENTENCIA_REPEAT
-                                | IDENTIFICADOR '(' EXPRESION ')' ';' {addEstructura("Llamado a funcion");}
+                                | LLAMADO_FUNCION ';' {addEstructura("Llamado a funcion");}
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
                                 ;
@@ -208,7 +222,7 @@ EXPRESION:                      EXPRESION '+' TERMINO {
                                     /*addTerceto(new Terceto("-", $1.sval, $3.sval)); */
                                     addTercetoAritmetica("-",$1.sval,$3.sval);
                                     $$ = getReferenciaUltimaInstruccion(); }
-                                | TERMINO { $$ = new ParserVal($1.sval); }
+                                | TERMINO { $$ = $1; }
                                 ;
 
 TERMINO:                        TERMINO '*' FACTOR { 
@@ -219,7 +233,7 @@ TERMINO:                        TERMINO '*' FACTOR {
                                     /*addTerceto(new Terceto("/", $1.sval, $3.sval));*/
                                     addTercetoAritmetica("/",$1.sval,$3.sval);
                                     $$ = getReferenciaUltimaInstruccion();}
-                                | FACTOR {$$ = new ParserVal($1.sval);}
+                                | FACTOR {$$ = $1;}
                                 ;
                                 
 PARAMETRO:                      TIPO IDENTIFICADOR {
@@ -242,7 +256,10 @@ FACTOR:                         IDENTIFICADOR { $$ = new ParserVal(getAmbitoIden
 				                            $$ = new ParserVal("-" + $2.sval);
                                         }
                                 | CONVERSION { $$ = new ParserVal($1.sval);}
-                                | IDENTIFICADOR '(' EXPRESION ')' {addEstructura("Llamado a funcion como operando"); $$ = new ParserVal(getAmbitoIdentificador($1.sval));}
+                                | LLAMADO_FUNCION {addEstructura("Llamado a funcion como operando"); $$ = $1;}
+                                ;
+
+LLAMADO_FUNCION:                IDENTIFICADOR '(' EXPRESION ')' {String id = getAmbitoIdentificador($1.sval); addTerceto(new Terceto("CALL_FUNC", id, $3.sval,getTipo(id))); $$ = getReferenciaUltimaInstruccion();}
                                 ;
 
 OPERADOR_COMPARADOR:            '>' {$$ = new ParserVal(">");}
@@ -355,12 +372,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
         }
         variables.clear();
     }
-/*
-    public void addUsoIdentificador(String lexema, String uso) {
-        Map<String, Object> atributos = lexico.getAtributosLexema(lexema);
-        atributos.put("USO", uso);        
-    }
-*/
+
     public String getAmbito(List<String> ambitoActual) {
         // a partir de una lista de strings, se devuelve el ambito con el formato: '.ambito1.ambito2'.
         String ambito = "";
@@ -468,8 +480,19 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     // En el caso de que se haya detectado un error semantico, no se genera el codigo
     // Pero se permite que el programa siga reconociendo errores y estructuras
     public void addTerceto(Terceto t){
-        if(!errorSemantico)
+        if(!errorSemantico) {
             tercetos.add(t);
+        }
+    }
+
+    public void checkRetornoFuncion(String expresion){
+        String ambito = getAmbito(ambitoActual);
+        String ambitoSplit[] = ambito.split("\\."); 
+        String funcion = ambitoSplit[ambitoSplit.length - 1];
+        funcion += ambito.split(funcion)[0];
+        funcion = funcion.substring(0,funcion.length()-1);
+
+        checkTipos(expresion, funcion);
     }
     
 }
