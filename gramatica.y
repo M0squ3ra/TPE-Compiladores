@@ -7,6 +7,7 @@
     import java.util.ArrayList;
     import java.util.List;
     import java.util.Map;
+    import java.util.HashMap;
     import java.io.IOException;
     import java.math.BigDecimal;
     import java.util.Stack;
@@ -49,7 +50,7 @@ ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES ';' {addEstruct
                                 | ASIGNACION_FUNC_VAR_ERROR
                                 ;
 
-ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO ')' VARIABLES ';' {yyerror("Falta el tipo de la funcion.");}
+ASIGNACION_FUNC_VAR_ERROR:      error FUNC '('TIPO')' VARIABLES ';' {yyerror("Falta el tipo de la funcion.");}
                                 | TIPO error '('TIPO ')' VARIABLES ';' {yyerror("Falta la palabra reservada FUNC.");}
                                 | TIPO FUNC error TIPO ')' VARIABLES ';' {yyerror("Falta el primer parentesis en la asignacion de la funcion.");}
                                 | TIPO FUNC '(' error ')' VARIABLES ';' {yyerror("Falta el tipo del parametro en la asignacion de la funcion.");}
@@ -67,11 +68,14 @@ CUERPO_FUNC:                    BEGIN CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';
                                 | BEGIN RETURN_FUNC ';' END ';'
                                 | BEGIN PRECONDICION_FUNC CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';' {
                                     Terceto bifurcacionIncondicional = backpatching.pop();
-                                    bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
+                                    // bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
+                                    bifurcacionIncondicional.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
+                                    
                                 }
                                 | BEGIN PRECONDICION_FUNC RETURN_FUNC ';' END ';' {
                                     Terceto bifurcacionIncondicional = backpatching.pop();
-                                    bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
+                                    // bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
+                                    bifurcacionIncondicional.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
                                 }
                                 ;
     
@@ -85,18 +89,26 @@ PRECONDICION_FUNC:              PRE ':' '(' CONDICION ')' ',' CADENA ';' {
                                         Terceto bifurcacionIncondicional = new Terceto("BI", null);
                                         addTerceto(bifurcacionIncondicional);
                                         backpatching.push(bifurcacionIncondicional);
-                                        bifurcacionTrue.setOperando2("[" + tercetos.size() + "]");
+                                        // bifurcacionTrue.setOperando2("[" + tercetos.size() + "]");
+                                        bifurcacionTrue.setOperando2("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
                                         }
                                 ;
 
-ENCABEZADO_FUNC:                TIPO FUNC IDENTIFICADOR {addAtributoLexema($3.sval,"TIPO",$1.sval); verificarRedeclaracion($3.sval, "ID_FUNC"); ambitoActual.add(0, $3.sval);} '(' PARAMETRO ')' 
-                                | ENCABEZADO_FUNC_ERROR
+ENCABEZADO_FUNC:                TIPO FUNC IDENTIFICADOR '(' TIPO IDENTIFICADOR ')'
+                                    {addAtributoLexema($3.sval,"TIPO",$1.sval);
+                                    verificarRedeclaracion($3.sval, "ID_FUNC");
+                                    addAtributoLexema(getAmbitoIdentificador($3.sval),"TIPO_PARAMETRO", $5.sval);
+
+                                    ambitoActual.add(0, $3.sval);
+                                    
+                                    String identificador = setAmbitoIdentificador($6.sval);
+                                    addAtributoLexema(identificador,"USO","ID_PARAMETRO"); 
+                                    addAtributoLexema(identificador,"TIPO",$5.sval);
+                                    addAtributoLexema(getAmbitoIdentificador($3.sval),"NOMBRE_PARAMETRO", identificador);
+                                    }
                                 ;                
 
-ENCABEZADO_FUNC_ERROR:          error FUNC IDENTIFICADOR '(' PARAMETRO ')' {yyerror("Falta el tipo de la funcion.");}
-                                | TIPO error IDENTIFICADOR '(' PARAMETRO ')' {yyerror("Falta la palabra clave FUNC.");}
-                                | TIPO FUNC error '(' PARAMETRO ')'{yyerror("Falta el identificador de la funcion.");}
-                                ;
+
 
 DECLARACION_VARIABLES:          TIPO VARIABLES ';' {addEstructura("Declaracion de variables");
                                                     addTipoVariables();
@@ -162,13 +174,16 @@ CONDICION_IF:                   '(' CONDICION ')' { Terceto terceto = new Tercet
 CUERPO_IF:                      BLOQUE_SENTENCIA
                                 | BLOQUE_SENTENCIA ELSE
                                     {Terceto tercetoIncompleto = backpatching.pop(); 
-                                    tercetoIncompleto.setOperando2("[" + (tercetos.size() + 1) + "]");
+                                    
+                                    // tercetoIncompleto.setOperando2("[" + (tercetos.size() + 1) + "]");
+                                    tercetoIncompleto.setOperando2("[" + (tercetos.get(getIdentificadorFuncionActual()).size() + 1) + "]");
                                     Terceto bifurcacionIncondicional = new Terceto("BI", null);
                                     addTerceto(bifurcacionIncondicional);
                                     backpatching.push(bifurcacionIncondicional);}
                                     BLOQUE_SENTENCIA
                                     {Terceto tercetoIncompleto = backpatching.pop();
-                                    tercetoIncompleto.setOperando1("[" + tercetos.size() + "]");}
+                                    // tercetoIncompleto.setOperando1("[" + tercetos.size() + "]");}
+                                    tercetoIncompleto.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");}
                                                         
                                 ; 
 
@@ -185,9 +200,10 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                         String id = getAmbitoIdentificador($3.sval);
                                         addTerceto(new Terceto("+", id, $11.sval));
                                         addTerceto(new Terceto(":=", id, getReferenciaUltimaInstruccion().sval));
-                                        String referenciaBI = "[" + tercetos.indexOf(destinoBifurcacionIncondicional) + "]";
+                                        String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";
                                         addTerceto(new Terceto("BI", referenciaBI));
-                                        String referenciaBF = "[" + tercetos.size() + "]";
+                                        // String referenciaBF = "[" + tercetos.size() + "]";
+                                        String referenciaBF = "[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]";
                                         bifurcacionFalse.setOperando2(referenciaBF);
                                         }
                                 ;
@@ -236,17 +252,6 @@ TERMINO:                        TERMINO '*' FACTOR {
                                 | FACTOR {$$ = $1;}
                                 ;
                                 
-PARAMETRO:                      TIPO IDENTIFICADOR {
-                                    String identificador = setAmbitoIdentificador($2.sval);
-                                    addAtributoLexema(identificador,"USO","ID_PARAMETRO"); 
-                                    addAtributoLexema(identificador,"TIPO",$1.sval);
-                                    }
-                                | PARAMETRO_ERROR
-                                ;
-                                
-PARAMETRO_ERROR:                TIPO error {yyerror("Falta el identificador");}
-                                ;
-
 FACTOR:                         IDENTIFICADOR { $$ = new ParserVal(getAmbitoIdentificador($1.sval));}   
                                 | CTE {if (!checkRango($1.sval)){
                                             yyerror("Constante fuera de rango");
@@ -259,7 +264,15 @@ FACTOR:                         IDENTIFICADOR { $$ = new ParserVal(getAmbitoIden
                                 | LLAMADO_FUNCION {addEstructura("Llamado a funcion como operando"); $$ = $1;}
                                 ;
 
-LLAMADO_FUNCION:                IDENTIFICADOR '(' EXPRESION ')' {String id = getAmbitoIdentificador($1.sval); addTerceto(new Terceto("CALL_FUNC", id, $3.sval,getTipo(id))); $$ = getReferenciaUltimaInstruccion();}
+LLAMADO_FUNCION:                IDENTIFICADOR '(' EXPRESION ')' {String id = getAmbitoIdentificador($1.sval);
+                                                                if(lexico.getAtributosLexema(id).get("TIPO_PARAMETRO").equals(getTipo($3.sval))){
+                                                                    addTerceto(new Terceto("CALL_FUNC", id, $3.sval,getTipo(id))); 
+                                                                    $$ = getReferenciaUltimaInstruccion();
+                                                                } else {
+                                                                    yyerrorSemantico("Tipo de la expresion incompatible con el parametro de la funcion");
+                                                                    $$ = new ParserVal(id);
+                                                                }
+                                                                }
                                 ;
 
 OPERADOR_COMPARADOR:            '>' {$$ = new ParserVal(">");}
@@ -290,14 +303,12 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     private String tipo;
     private String nombrePrograma;
     private List<String> ambitoActual = new ArrayList<String>();
-    private List<Terceto> tercetos = new ArrayList<Terceto>();
+    private Map<String,List<Terceto>> tercetos = new HashMap<String,List<Terceto>>();
     private Stack<Terceto> backpatching = new Stack<Terceto>();
     private boolean errorSemantico = false;
+    private Map<String,List<String>> variablesFunciones = new HashMap<String,List<String>>();
 
     
-    public static void main(String args[]){
-        
-    }
 
     public int yylex(){ 
         
@@ -324,12 +335,16 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     }
 
     public void yyerror(String error){
-        erroresSintacticos.add(new Error(error,false,lexico.getLinea()));
+        Error e = new Error(error,false,lexico.getLinea());
+        if (!erroresSintacticos.contains(e))
+            erroresSintacticos.add(e);
     }
 
     public void yyerrorSemantico(String error){
         errorSemantico = true;
-        erroresSemanticos.add(new Error(error,false,lexico.getLinea()));
+        Error e = new Error(error,false,lexico.getLinea());
+        if(!erroresSemanticos.contains(e))
+            erroresSemanticos.add(new Error(error,false,lexico.getLinea()));
     }
     
     public List<Error> getErroresSintacticos(){
@@ -410,10 +425,20 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     }
 
     public ParserVal getReferenciaUltimaInstruccion() {
-        return new ParserVal("["+ (tercetos.size() - 1) + "]");
+        List<Terceto> listaTercetos = tercetos.get(getIdentificadorFuncionActual());
+
+        if(listaTercetos == null){
+            tercetos.put(getIdentificadorFuncionActual(), new ArrayList<Terceto>());
+            yyerrorSemantico("Error");
+            return  new ParserVal("[-1]"); // Si pongo null a generar un error, pero si hago new ParserVal
+                         // mas adelante me va a decir que hay error de compatibilidad de tipos
+                         // cuando no es asi
+        }
+
+        return new ParserVal("["+ (listaTercetos.size() - 1) + "]");
     }
 
-    public List<Terceto> getTercetos(){
+    public Map<String,List<Terceto>> getTercetos(){
         return tercetos;
     }
 
@@ -422,9 +447,20 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
             yyerrorSemantico("Identificador ya utilizado en el ámbito.");
         } else {
             identificador = setAmbitoIdentificador(identificador);
-            variables.add(identificador);
+            if (uso.equals("ID_VARIABLE")){
+                variables.add(identificador);
+                String funcion = getIdentificadorFuncionActual();
+                if(variablesFunciones.get(funcion) == null)
+                    variablesFunciones.put(funcion, new ArrayList<String>());
+                variablesFunciones.get(funcion).add(identificador);
+            }
+                
             addAtributoLexema(identificador,"USO",uso);
         }
+    }
+
+    public Map<String,List<String>> getVariablesFunciones(){
+        return variablesFunciones;
     }
 
     public String getTipo(String o){
@@ -433,10 +469,10 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
             return (String) lexico.getAtributosLexema(o).get("TIPO");
         } 
         else {
-            
+            List<Terceto> listaTercetos = tercetos.get(getIdentificadorFuncionActual());
             String tipo = null;
-            if(tercetos.size() > 0){ //Para cuando el error semantico se da antes de agregar cualquier terceto
-                Terceto t = tercetos.get((Integer.parseInt(o.substring(1, o.length() - 1 ))));
+            if(listaTercetos.size() > 0){ //Para cuando el error semantico se da antes de agregar cualquier terceto
+                Terceto t = listaTercetos.get((Integer.parseInt(o.substring(1, o.length() - 1 ))));
                 tipo = t.getTipo();
             }
             return tipo;
@@ -477,15 +513,37 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
         }         
     }
 
+    public String getIdentificadorFuncionActual(){
+        String ambito = getAmbito(ambitoActual);
+        String ambitoSplit[] = ambito.split("\\."); 
+        String funcion = ambitoSplit[ambitoSplit.length - 1];
+        funcion += ambito.split(funcion)[0];
+        funcion = funcion.substring(0,funcion.length()-1);
+
+        return funcion;
+    }
+
     // En el caso de que se haya detectado un error semantico, no se genera el codigo
     // Pero se permite que el programa siga reconociendo errores y estructuras
     public void addTerceto(Terceto t){
-        if(!errorSemantico) {
-            tercetos.add(t);
+        
+        String funcion = getIdentificadorFuncionActual();
+        List<Terceto> listaTercetos = tercetos.get(funcion);
+        
+        if(listaTercetos == null){
+            listaTercetos = new ArrayList<Terceto>();
+            tercetos.put(funcion,listaTercetos);
         }
+        
+        listaTercetos.add(t);
+    }
+
+    public boolean getError(){
+        return errorSemantico;
     }
 
     public void checkRetornoFuncion(String expresion){
+        // Obtiene el lexema de la funcion
         String ambito = getAmbito(ambitoActual);
         String ambitoSplit[] = ambito.split("\\."); 
         String funcion = ambitoSplit[ambitoSplit.length - 1];

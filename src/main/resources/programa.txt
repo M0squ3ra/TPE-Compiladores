@@ -1,38 +1,21 @@
 Mi_Progama;
 
-INT a, m, i;
-SINGLE b;
+INT a,b;
+SINGLE c;
 
-INT FUNC myfunc(SINGLE a)
-    INT FUNC myfuncAnidada(SINGLE a)
-    BEGIN
-        a := 2.1;
-        RETURN(2);
-    END;
+SINGLE FUNC myFunc (SINGLE a) 
+INT d; //si pongo c no me genera otro ambito para la variable //
+SINGLE e; 
 BEGIN
-    PRE: (a < m), %PRECONDICION NO CUMPLIDA%;
-    a := 3.1;
-    m := 4;
-    RETURN(2);
+    d := 2;
+    RETURN(SINGLE(d) + b);
 END;
 
-
 BEGIN
+    a := a - SINGLE(b) + 1; // si declaro una funcion, y retorna algo de distinto tipo, tengo el problema de que aca va a error cuando se haga el chequeo de tipos porque no va a estar el terceto//
+    c := SINGLE(1);
+    c := SINGLE(a + 1) + 2.1;
+    c := SINGLE(a + 1);
 
-//
-    IF (5 > 2) THEN
-        a := 5;
-    ENDIF;
-    
-    b := 5;
-    a := b + 5;
-    a := 5 + b;
-
-    REPEAT (a := 1; i < m; 99)
-    BEGIN
-        m := 4;
-    END//
-
-    a := myfunc(2.1);
 
 END $

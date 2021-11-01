@@ -17,4 +17,10 @@ public class Error {
         return "[" + errorType + "] - linea " + this.line + " - " + this.message;
     }
 
+    @Override
+    public boolean equals(Object o){
+        Error e = (Error)o;
+        return this.toString().equals(e.toString());
+    }
+
 }

@@ -45,7 +45,7 @@ public class AccionSemantica4 implements AccionSemantica {
 
                 // almacenar otras propiedades.
                 if (buffer.length() > Lexico.TAMANO_BUFFER){
-                    buffer = buffer.substring(0, 21);
+                    lexico.recortarBuffer();
                     Error error = new Error("El identificador no puede superar los 22 caracteres. Se procede a recortarlo.", true, lexico.getLinea());
                     lexico.addError(error);
                 }

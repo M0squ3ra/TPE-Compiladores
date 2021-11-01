@@ -10,6 +10,7 @@ import java.util.Map;
 import com.company.Analizadores.Lexico;
 import com.company.Analizadores.Parser;
 import com.company.Util.Error;
+import com.company.Util.GeneradorCodigo;
 import com.company.Util.Terceto;
 
 
@@ -24,12 +25,12 @@ public class Main {
         Parser parser = new Parser(false);
 		parser.yyparse();
 
-        System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
-        System.out.println(" Las estructuras que contienen errores no se muestran");
-        System.out.println("*---------------------------------------------------------------------------*");
-        for(String i: parser.getEstructurasReconocidas()){
-            System.out.println(i);
-        }
+        // System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
+        // System.out.println(" Las estructuras que contienen errores no se muestran");
+        // System.out.println("*---------------------------------------------------------------------------*");
+        // for(String i: parser.getEstructurasReconocidas()){
+        //     System.out.println(i);
+        // }
 
         // // devuelve una lista pero yylex los reconoce a medida que se lo piden
         // System.out.println("\n Tokens Reconocidos (Orden -->)");
@@ -63,11 +64,25 @@ public class Main {
                 System.out.println("    " + j + ": " + atributos.get(j));
         }
 
-        System.out.println("\n Tercetos - [Nro.Terceto][Tipo](Terceto)");
-        System.out.println("*-------------------*");
-        List<Terceto> tercetos = parser.getTercetos();
-        for(Terceto t: tercetos)
-            System.out.println("[" +tercetos.indexOf(t) + "] " + t.toString());
+        if(!parser.getError()){
+            System.out.println("\n Tercetos - [Nro.Terceto][Tipo](Terceto)");
+            System.out.println("*-------------------*");
+            Map<String,List<Terceto>> listasTercetos = parser.getTercetos();
+            for(String s : listasTercetos.keySet()){
+                List<Terceto> tercetos = listasTercetos.get(s);
+                System.out.println("---" + s + "---");
+                for(Terceto t: tercetos)
+                    System.out.println("    [" +tercetos.indexOf(t) + "] " + t.toString());
+            }
+            System.out.println("\nCodigo generado");
+            System.out.println("*-------------------*");
+            GeneradorCodigo.setTablaSimbolos(tablaSimbolos);
+            GeneradorCodigo.setVariables(parser.getVariablesFunciones());
+            GeneradorCodigo.generar(listasTercetos, "Mi_Progama"); // desharcodear id main
+        }
+        
+
+        
 
     }
 

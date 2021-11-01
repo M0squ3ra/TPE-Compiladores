@@ -278,4 +278,8 @@ public class Lexico {
         Lexico.tablaSimbolos.put(lexema + ambito, atributos);   
         Lexico.tablaSimbolos.remove(lexema);
     }
+
+    public void recortarBuffer(){
+        Lexico.buffer = Lexico.buffer.substring(0, 21);
+    }
 }
