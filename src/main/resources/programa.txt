@@ -2,9 +2,14 @@ Mi_Progama;
 
 INT a;
 
+INT FUNC myFunc2 (INT v)
+BEGIN
+    RETURN(2);
+END;
+
 INT FUNC myFunc (INT var) 
 BEGIN
-    var := var + 2;
+    var := var + myFunc2(2);
     RETURN(var);
 END;
 

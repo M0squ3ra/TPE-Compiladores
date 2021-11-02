@@ -1,5 +1,9 @@
 package com.company.Util;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +19,7 @@ public class GeneradorCodigo {
     private static List<String> js = new ArrayList<String>();
     private static String mainWat = "";
     private static String mainJs = "";
-    // System.out.println("\t".repeat(tabs) + t.toString());
+    private static String mainHtml = "";
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -42,22 +46,37 @@ public class GeneradorCodigo {
             generarCodigoFuncion(tercetos.get(nombreFuncion), nombreFuncion, identificadorMain);
         }
         mainWat = mainWat.concat(")\n");
-
+        
         generarJs(identificadorMain);
 
+        System.out.println("              main.wat"); 
+        System.out.println("+--------------------------------------+\n");
         System.out.println(mainWat);
+        try {
+            BufferedWriter brWat = new BufferedWriter(new FileWriter(new File("./wasm/main.wat")));
+            brWat.write(mainWat);
+            brWat.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("              main.js"); 
+        System.out.println("+--------------------------------------+\n");
         System.out.println(mainJs);
-        
-
+        try {
+            BufferedWriter brJs = new BufferedWriter(new FileWriter(new File("./wasm/main.js")));
+            brJs.write(mainJs);
+            brJs.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }   
     }
     
     public static void generarCodigoFuncion(List<Terceto> tercetos, String nombreFuncion, String identificadorMain){
         if (!nombreFuncion.equals(identificadorMain)){
             String tipoRetorno = (tablaSimbolos.get(nombreFuncion).get("TIPO").equals("INT"))?"i32":"f32";
-            // MODIFICAR: Va a generar un error si no se declara un parametro
             String parametro = (String)(tablaSimbolos.get(nombreFuncion).get("NOMBRE_PARAMETRO"));
             String tipoParametro = (tablaSimbolos.get(nombreFuncion).get("TIPO_PARAMETRO").equals("INT"))?"i32":"f32";
-            mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + "(param $" + parametro + " " + tipoParametro + ")(result " + tipoRetorno + ")\n");           
+            mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (param $" + parametro + " " + tipoParametro + ") (result " + tipoRetorno + ")\n");           
         } else{
             mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (export \"" + nombreFuncion + "\")\n"); // tiene que devolver algo si o si           
         }
@@ -130,7 +149,6 @@ public class GeneradorCodigo {
         mainWat = mainWat.concat(";; ----------------------------------------\n");
         int sumaCadenas = 0; // Marca el inicio de la cadena
         for(String cadena: GeneradorCodigo.cadenas){
-            // (data (i32.const 0) "Hello, World!")
             cadenasMapeadas.put(cadena, sumaCadenas);
             mainWat = mainWat.concat("\t".repeat(tabs) + "(data (i32.const " + sumaCadenas + ") \"" + cadena.substring(1,cadena.length()-1) + "\")\n");
             sumaCadenas += cadena.length() - 2; // quito los %
@@ -145,7 +163,6 @@ public class GeneradorCodigo {
     private static void generarCodigoAsignacion(Terceto t){
         String tipo;
                 if (t.getOperando2().startsWith("[")){
-                    // mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2());
                     mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
                 } else {
                     tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
@@ -155,7 +172,7 @@ public class GeneradorCodigo {
     }
 
     private static void generarCodigoLlamadoFuncion(Terceto t){
-        if (!t.getOperando2().startsWith("[")){ // en caso de ser un terceto, el ooperando ya esta en la pila
+        if (!t.getOperando2().startsWith("[")){ // en caso de ser un terceto, el operando ya esta en la pila
             if (Character.isDigit(t.getOperando2().charAt(0))){
                 String tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
@@ -223,8 +240,6 @@ public class GeneradorCodigo {
     }
 
     public static void generarJs(String identificadorMain){
-        mainJs = mainJs.concat("\n\n   main.js\n"); // falta el export
-        mainJs = mainJs.concat("----------------------------------------\n");
         mainJs = mainJs.concat(""
             .concat("let import_object = {\n")
             .concat("    \"js\":{\n")

@@ -74,17 +74,13 @@ public class Main {
                 for(Terceto t: tercetos)
                     System.out.println("    [" +tercetos.indexOf(t) + "] " + t.toString());
             }
-            System.out.println("\nCodigo generado");
+            System.out.println("\n   Codigo generado");
             System.out.println("*-------------------*");
             GeneradorCodigo.setTablaSimbolos(tablaSimbolos);
             GeneradorCodigo.setVariables(parser.getVariablesFunciones());
             GeneradorCodigo.setCadenas(parser.getCadenas());
             GeneradorCodigo.generar(listasTercetos, "Mi_Progama"); // desharcodear id main
         }
-        
-
-        
-
     }
 
     public static List<Character> leerArchivo(String path) throws IOException{
