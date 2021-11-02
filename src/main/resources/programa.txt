@@ -23,7 +23,9 @@ BEGIN
     BEGIN
         a := a + 1;
     END;//
-
+    PRINT(%Hola mundo%);
+    PRINT(%mundo%);
+    PRINT(%Chau mundo!!!%);
     a := a + 1 - 2;
 
 END $

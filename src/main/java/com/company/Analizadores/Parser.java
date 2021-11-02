@@ -523,7 +523,7 @@ final static String yyrule[] = {
 "TIPO : INT",
 };
 
-//#line 299 "gramatica.y"
+//#line 300 "gramatica.y"
 
     private Lexico lexico = Lexico.getInstance();
     private List<Error> erroresSintacticos = new ArrayList<Error>(); 
@@ -538,6 +538,7 @@ final static String yyrule[] = {
     private Stack<Terceto> backpatching = new Stack<Terceto>();
     private boolean errorSemantico = false;
     private List<String> variablesFunciones = new ArrayList<String>();
+    private List<String> cadenas = new ArrayList<String>();
 
     
 
@@ -563,6 +564,14 @@ final static String yyrule[] = {
 
     public List<Integer> getTokensReconocidos(){
         return tokensReconocidos;
+    }
+
+    public List<String> getCadenas(){
+        return cadenas;
+    }
+
+    public void addCadena(String cadena){
+        cadenas.add(cadena);
     }
 
     public void yyerror(String error){
@@ -785,7 +794,7 @@ final static String yyrule[] = {
     }
     
 
-//#line 719 "Parser.java"
+//#line 728 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1023,7 +1032,8 @@ case 30:
 {
                                         Terceto bifurcacionTrue = new Terceto("BT", val_peek(4).sval, null);
                                         addTerceto(bifurcacionTrue);
-                                        addTerceto(new Terceto("PRINT", val_peek(1).sval));
+                                        addTerceto(new Terceto("PRINT", val_peek(1).sval + "%"));
+                                        addCadena(val_peek(1).sval + "%");
                                         Terceto bifurcacionIncondicional = new Terceto("BI", null);
                                         addTerceto(bifurcacionIncondicional);
                                         backpatching.push(bifurcacionIncondicional);
@@ -1032,7 +1042,7 @@ case 30:
                                         }
 break;
 case 31:
-//#line 98 "gramatica.y"
+//#line 99 "gramatica.y"
 {addAtributoLexema(val_peek(4).sval,"TIPO",val_peek(6).sval);
                                     verificarRedeclaracion(val_peek(4).sval, "ID_FUNC");
                                     addAtributoLexema(getAmbitoIdentificador(val_peek(4).sval),"TIPO_PARAMETRO", val_peek(2).sval);
@@ -1046,37 +1056,37 @@ case 31:
                                     }
 break;
 case 32:
-//#line 113 "gramatica.y"
+//#line 114 "gramatica.y"
 {addEstructura("Declaracion de variables");
                                                     addTipoVariables();
                                                     }
 break;
 case 34:
-//#line 119 "gramatica.y"
+//#line 120 "gramatica.y"
 {yyerror("Variables mal declaradas.");}
 break;
 case 35:
-//#line 123 "gramatica.y"
-{verificarRedeclaracion(val_peek(0).sval, "ID_VARIABLE");}
-break;
-case 36:
 //#line 124 "gramatica.y"
 {verificarRedeclaracion(val_peek(0).sval, "ID_VARIABLE");}
 break;
+case 36:
+//#line 125 "gramatica.y"
+{verificarRedeclaracion(val_peek(0).sval, "ID_VARIABLE");}
+break;
 case 37:
-//#line 127 "gramatica.y"
+//#line 128 "gramatica.y"
 {addEstructura("Bloque de sentencias con BEGIN/END");}
 break;
 case 40:
-//#line 132 "gramatica.y"
+//#line 133 "gramatica.y"
 {yyerror("Falta el BEGIN del bloque de sentencia.");}
 break;
 case 41:
-//#line 133 "gramatica.y"
+//#line 134 "gramatica.y"
 {yyerror("Falta el END del bloque de sentencia");}
 break;
 case 44:
-//#line 140 "gramatica.y"
+//#line 141 "gramatica.y"
 {
                                     addEstructura("Asignacion"); 
                                     String id = getAmbitoIdentificador(val_peek(3).sval);
@@ -1095,30 +1105,30 @@ case 44:
                                 }
 break;
 case 45:
-//#line 156 "gramatica.y"
-{addEstructura("Sentencia PRINT"); addTerceto(new Terceto("PRINT", val_peek(2).sval)); }
+//#line 157 "gramatica.y"
+{addEstructura("Sentencia PRINT"); addTerceto(new Terceto("PRINT", val_peek(2).sval + "%")); addCadena(val_peek(2).sval + "%");}
 break;
 case 46:
-//#line 157 "gramatica.y"
+//#line 158 "gramatica.y"
 {addEstructura("BREAK"); addTerceto(new Terceto("BREAK"));}
 break;
 case 49:
-//#line 160 "gramatica.y"
+//#line 161 "gramatica.y"
 {addEstructura("Llamado a funcion");}
 break;
 case 52:
-//#line 166 "gramatica.y"
+//#line 167 "gramatica.y"
 {addEstructura("Sentencia IF");
                                     addTerceto(new Terceto("END_IF"));}
 break;
 case 53:
-//#line 170 "gramatica.y"
+//#line 171 "gramatica.y"
 { Terceto terceto = new Terceto("BF", val_peek(1).sval, null);
                                                     addTerceto(terceto);
                                                     backpatching.push(terceto); }
 break;
 case 55:
-//#line 177 "gramatica.y"
+//#line 178 "gramatica.y"
 {Terceto tercetoIncompleto = backpatching.pop(); 
                                     
                                     /* tercetoIncompleto.setOperando2("[" + (tercetos.size() + 1) + "]");*/
@@ -1128,25 +1138,25 @@ case 55:
                                     backpatching.push(bifurcacionIncondicional);}
 break;
 case 56:
-//#line 185 "gramatica.y"
+//#line 186 "gramatica.y"
 {Terceto tercetoIncompleto = backpatching.pop();
                                     /* tercetoIncompleto.setOperando1("[" + tercetos.size() + "]");}*/
                                     tercetoIncompleto.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");}
 break;
 case 57:
-//#line 191 "gramatica.y"
+//#line 192 "gramatica.y"
 {
                                             String id = getAmbitoIdentificador(val_peek(2).sval); 
                                             addTerceto(new Terceto(":=", id, val_peek(0).sval)); }
 break;
 case 58:
-//#line 194 "gramatica.y"
+//#line 195 "gramatica.y"
 { 
                                             Terceto tercetoIncompleto = new Terceto("BF", val_peek(0).sval, null); 
                                             addTerceto(tercetoIncompleto); backpatching.push(tercetoIncompleto); }
 break;
 case 59:
-//#line 197 "gramatica.y"
+//#line 198 "gramatica.y"
 { 
                                         addEstructura("Sentencia REPEAT");
                                         Terceto bifurcacionFalse = backpatching.pop();
@@ -1164,108 +1174,108 @@ case 59:
                                         }
 break;
 case 60:
-//#line 216 "gramatica.y"
+//#line 217 "gramatica.y"
 {Terceto terceto = new Terceto(val_peek(1).sval, getAmbitoIdentificador(val_peek(2).sval), val_peek(0).sval); addTerceto(terceto); backpatching.push(terceto); yyval = getReferenciaUltimaInstruccion();}
 break;
 case 61:
-//#line 219 "gramatica.y"
+//#line 220 "gramatica.y"
 {yyerror("Falta el identificador de la asignación.");}
 break;
 case 62:
-//#line 220 "gramatica.y"
+//#line 221 "gramatica.y"
 {yyerror("Falta la expresión en la asignación.");}
 break;
 case 63:
-//#line 223 "gramatica.y"
+//#line 224 "gramatica.y"
 {yyerror("Falta el primer paréntesis del PRINT.");}
 break;
 case 64:
-//#line 224 "gramatica.y"
+//#line 225 "gramatica.y"
 {yyerror("Falta la cadena del PRINT.");}
 break;
 case 65:
-//#line 225 "gramatica.y"
+//#line 226 "gramatica.y"
 {yyerror("Falta el último paréntesis del PRINT.");}
 break;
 case 66:
-//#line 228 "gramatica.y"
+//#line 229 "gramatica.y"
 { addTerceto(new Terceto(val_peek(1).sval, val_peek(2).sval, val_peek(0).sval)); yyval = getReferenciaUltimaInstruccion();}
 break;
 case 67:
-//#line 229 "gramatica.y"
+//#line 230 "gramatica.y"
 {addTerceto(new Terceto(val_peek(1).sval, val_peek(2).sval, val_peek(0).sval)); yyval = getReferenciaUltimaInstruccion();}
 break;
 case 68:
-//#line 230 "gramatica.y"
+//#line 231 "gramatica.y"
 { yyval = new ParserVal(val_peek(0).sval); }
 break;
 case 69:
-//#line 233 "gramatica.y"
+//#line 234 "gramatica.y"
 { addTerceto(new Terceto("CONV", val_peek(1).sval, null, "SINGLE")); yyval = getReferenciaUltimaInstruccion();}
 break;
 case 70:
-//#line 236 "gramatica.y"
+//#line 237 "gramatica.y"
 { 
                                     /*addTerceto(new Terceto("+", $1.sval, $3.sval)); */
                                     addTercetoAritmetica("+",val_peek(2).sval,val_peek(0).sval);
                                     yyval = getReferenciaUltimaInstruccion(); }
 break;
 case 71:
-//#line 240 "gramatica.y"
+//#line 241 "gramatica.y"
 { 
                                     /*addTerceto(new Terceto("-", $1.sval, $3.sval)); */
                                     addTercetoAritmetica("-",val_peek(2).sval,val_peek(0).sval);
                                     yyval = getReferenciaUltimaInstruccion(); }
 break;
 case 72:
-//#line 244 "gramatica.y"
+//#line 245 "gramatica.y"
 { yyval = val_peek(0); }
 break;
 case 73:
-//#line 247 "gramatica.y"
+//#line 248 "gramatica.y"
 { 
                                     /*addTerceto(new Terceto("*", $1.sval, $3.sval)); */
                                     addTercetoAritmetica("*",val_peek(2).sval,val_peek(0).sval);
                                     yyval = getReferenciaUltimaInstruccion(); }
 break;
 case 74:
-//#line 251 "gramatica.y"
+//#line 252 "gramatica.y"
 { 
                                     /*addTerceto(new Terceto("/", $1.sval, $3.sval));*/
                                     addTercetoAritmetica("/",val_peek(2).sval,val_peek(0).sval);
                                     yyval = getReferenciaUltimaInstruccion();}
 break;
 case 75:
-//#line 255 "gramatica.y"
+//#line 256 "gramatica.y"
 {yyval = val_peek(0);}
 break;
 case 76:
-//#line 258 "gramatica.y"
+//#line 259 "gramatica.y"
 { yyval = new ParserVal(getAmbitoIdentificador(val_peek(0).sval));}
 break;
 case 77:
-//#line 259 "gramatica.y"
+//#line 260 "gramatica.y"
 {if (!checkRango(val_peek(0).sval)){
                                             yyerror("Constante fuera de rango");
                                         }
                                         yyval = new ParserVal(val_peek(0).sval); }
 break;
 case 78:
-//#line 263 "gramatica.y"
+//#line 264 "gramatica.y"
 {lexico.cambiarSimboloConstante(val_peek(0).sval);
 				                            yyval = new ParserVal("-" + val_peek(0).sval);
                                         }
 break;
 case 79:
-//#line 266 "gramatica.y"
+//#line 267 "gramatica.y"
 { yyval = new ParserVal(val_peek(0).sval);}
 break;
 case 80:
-//#line 267 "gramatica.y"
+//#line 268 "gramatica.y"
 {addEstructura("Llamado a funcion como operando"); yyval = val_peek(0);}
 break;
 case 81:
-//#line 270 "gramatica.y"
+//#line 271 "gramatica.y"
 {String id = getAmbitoIdentificador(val_peek(3).sval);
                                                                 if(lexico.getAtributosLexema(id).get("TIPO_PARAMETRO").equals(getTipo(val_peek(1).sval))){
                                                                     addTerceto(new Terceto("CALL_FUNC", id, val_peek(1).sval,getTipo(id))); 
@@ -1277,46 +1287,46 @@ case 81:
                                                                 }
 break;
 case 82:
-//#line 281 "gramatica.y"
+//#line 282 "gramatica.y"
 {yyval = new ParserVal(">");}
 break;
 case 83:
-//#line 282 "gramatica.y"
+//#line 283 "gramatica.y"
 {yyval = new ParserVal("<");}
 break;
 case 84:
-//#line 283 "gramatica.y"
-{yyval = new ParserVal(val_peek(0).sval);}
-break;
-case 85:
 //#line 284 "gramatica.y"
 {yyval = new ParserVal(val_peek(0).sval);}
 break;
-case 86:
+case 85:
 //#line 285 "gramatica.y"
 {yyval = new ParserVal(val_peek(0).sval);}
 break;
-case 87:
+case 86:
 //#line 286 "gramatica.y"
+{yyval = new ParserVal(val_peek(0).sval);}
+break;
+case 87:
+//#line 287 "gramatica.y"
 { yyval = new ParserVal(val_peek(0).sval); }
 break;
 case 88:
-//#line 289 "gramatica.y"
+//#line 290 "gramatica.y"
 { yyval = new ParserVal(val_peek(0).sval); }
 break;
 case 89:
-//#line 290 "gramatica.y"
+//#line 291 "gramatica.y"
 {yyval = new ParserVal(val_peek(0).sval); }
 break;
 case 90:
-//#line 293 "gramatica.y"
+//#line 294 "gramatica.y"
 {tipo = "SINGLE"; yyval = new ParserVal("SINGLE");}
 break;
 case 91:
-//#line 294 "gramatica.y"
+//#line 295 "gramatica.y"
 {tipo = "INT";  yyval = new ParserVal("INT");}
 break;
-//#line 1245 "Parser.java"
+//#line 1255 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

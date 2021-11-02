@@ -85,7 +85,8 @@ RETURN_FUNC:                    RETURN '(' EXPRESION ')' {checkRetornoFuncion($3
 PRECONDICION_FUNC:              PRE ':' '(' CONDICION ')' ',' CADENA ';' {
                                         Terceto bifurcacionTrue = new Terceto("BT", $4.sval, null);
                                         addTerceto(bifurcacionTrue);
-                                        addTerceto(new Terceto("PRINT", $7.sval));
+                                        addTerceto(new Terceto("PRINT", $7.sval + "%"));
+                                        addCadena($7.sval + "%");
                                         Terceto bifurcacionIncondicional = new Terceto("BI", null);
                                         addTerceto(bifurcacionIncondicional);
                                         backpatching.push(bifurcacionIncondicional);
@@ -153,7 +154,7 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {
                                         
                                       
                                 }
-				                | PRINT '(' CADENA ')' ';' {addEstructura("Sentencia PRINT"); addTerceto(new Terceto("PRINT", $3.sval)); }
+				                | PRINT '(' CADENA ')' ';' {addEstructura("Sentencia PRINT"); addTerceto(new Terceto("PRINT", $3.sval + "%")); addCadena($3.sval + "%");}
 				                | BREAK ';' {addEstructura("BREAK"); addTerceto(new Terceto("BREAK"));}
                                 | SENTENCIA_IF
                                 | SENTENCIA_REPEAT
@@ -310,6 +311,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     private Stack<Terceto> backpatching = new Stack<Terceto>();
     private boolean errorSemantico = false;
     private List<String> variablesFunciones = new ArrayList<String>();
+    private List<String> cadenas = new ArrayList<String>();
 
     
 
@@ -335,6 +337,14 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
     public List<Integer> getTokensReconocidos(){
         return tokensReconocidos;
+    }
+
+    public List<String> getCadenas(){
+        return cadenas;
+    }
+
+    public void addCadena(String cadena){
+        cadenas.add(cadena);
     }
 
     public void yyerror(String error){

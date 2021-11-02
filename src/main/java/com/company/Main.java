@@ -78,6 +78,7 @@ public class Main {
             System.out.println("*-------------------*");
             GeneradorCodigo.setTablaSimbolos(tablaSimbolos);
             GeneradorCodigo.setVariables(parser.getVariablesFunciones());
+            GeneradorCodigo.setCadenas(parser.getCadenas());
             GeneradorCodigo.generar(listasTercetos, "Mi_Progama"); // desharcodear id main
         }
         
