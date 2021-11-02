@@ -30,9 +30,6 @@ public class GeneradorCodigo {
     }
 
     public static void generar(Map<String,List<Terceto>> tercetos, String identificadorMain){
-        // Se necesita generar primero porque es el que declara las variables globales
-        // En todo caso hay que 
-        // ver como anidar las funciones, ahora son todas hermanas. Creo que se podria generar un arbol de anidamiento
         // Como los nombres de las variables en los tercetos conservan el ambito, se generaran solo variables globales
         // como salida por cuestiones de simplicidad
         mainWat = mainWat.concat("(module\n");
@@ -57,6 +54,7 @@ public class GeneradorCodigo {
     public static void generarCodigoFuncion(List<Terceto> tercetos, String nombreFuncion, String identificadorMain){
         if (!nombreFuncion.equals(identificadorMain)){
             String tipoRetorno = (tablaSimbolos.get(nombreFuncion).get("TIPO").equals("INT"))?"i32":"f32";
+            // MODIFICAR: Va a generar un error si no se declara un parametro
             String parametro = (String)(tablaSimbolos.get(nombreFuncion).get("NOMBRE_PARAMETRO"));
             String tipoParametro = (tablaSimbolos.get(nombreFuncion).get("TIPO_PARAMETRO").equals("INT"))?"i32":"f32";
             mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + "(param $" + parametro + " " + tipoParametro + ")(result " + tipoRetorno + ")\n");           
@@ -140,15 +138,19 @@ public class GeneradorCodigo {
                 
     }
 
+    private static String getModoObjeto(String operando){
+        return tablaSimbolos.get(operando).get("USO").equals("ID_VARIABLE")?"global":"local";
+    }
+
     private static void generarCodigoAsignacion(Terceto t){
         String tipo;
                 if (t.getOperando2().startsWith("[")){
-                    // mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $" + t.getOperando2());
-                    mainWat = mainWat.concat("\t".repeat(tabs) + "global.set $" + t.getOperando1() + "\n");
+                    // mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2());
+                    mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
                 } else {
                     tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                     mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
-                    mainWat = mainWat.concat("\t".repeat(tabs) + "global.set $" + t.getOperando1() + "\n");
+                    mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
                 }
     }
 
@@ -158,7 +160,7 @@ public class GeneradorCodigo {
                 String tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $" + t.getOperando2() + "\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         }
 
@@ -171,7 +173,7 @@ public class GeneradorCodigo {
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $" + t.getOperando1() + "\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         }
         mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n");
@@ -186,7 +188,7 @@ public class GeneradorCodigo {
                 tipo1 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWat = mainWat.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $" + t.getOperando1() + "\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         }
 
@@ -195,7 +197,7 @@ public class GeneradorCodigo {
                 tipo2 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWat = mainWat.concat("\t".repeat(tabs) + tipo2 + ".const " + t.getOperando2() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $" + t.getOperando2() + "\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         }
 
@@ -208,7 +210,7 @@ public class GeneradorCodigo {
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $" + t.getOperando1() + "\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } 
         mainWat = mainWat.concat("\t".repeat(tabs) + "f32.convert_s/i32\n");

@@ -1,17 +1,14 @@
 Mi_Progama;
 
-INT a,b;
-SINGLE c;
+INT a;
 
-INT FUNC myFunc (SINGLE a) 
-INT d; 
+INT FUNC myFunc (INT var) 
 BEGIN
-    d := 2;
-    RETURN(d + 1);
+    var := var + 2;
+    RETURN(var);
 END;
 
 BEGIN
-    //a := 1;//
     //IF (a < 1) THEN
         a := a + 1;
     ELSE
@@ -19,13 +16,8 @@ BEGIN
     ENDIF;//
     //a := myFunc(SINGLE(a));//
 
-    //REPEAT (a := 1; a < 5; 5)
-    BEGIN
-        a := a + 1;
-    END;//
     PRINT(%Hola mundo%);
-    PRINT(%mundo%);
-    PRINT(%Chau mundo!!!%);
-    a := a + 1 - 2;
+    a := myFunc(2);
+    PRINT(%Hola mundo2%);
 
 END $
