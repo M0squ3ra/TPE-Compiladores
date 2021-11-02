@@ -8,23 +8,24 @@ public class GeneradorCodigo {
 
     private static int tabs = 0;
     private static Map<String,Map<String,Object>> tablaSimbolos;
-    private static Map<String,List<String>> variables;
+    private static List<String> variablesFuncion;
     // System.out.println("\t".repeat(tabs) + t.toString());
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
     }
 
-    public static void setVariables(Map<String,List<String>> variables){
-        GeneradorCodigo.variables = variables;
+    public static void setVariables(List<String> variables){
+        GeneradorCodigo.variablesFuncion = variables;
     }
 
     public static void generar(Map<String,List<Terceto>> tercetos, String identificadorMain){
         // Se necesita generar primero porque es el que declara las variables globales
-        // Hay que ver el tema de las variables locales y globales, por ahora son todas locales,
-        // creo que como las funciones se declaran dentro del main, las variables del main son alcanzables
-        // dentro de la funcion, lo mismo para funciones adentro de funciones. En todo caso hay que 
+        // En todo caso hay que 
         // ver como anidar las funciones, ahora son todas hermanas. Creo que se podria generar un arbol de anidamiento
+        // Como los nombres de las variables en los tercetos conservan el ambito, se generaran solo variables globales
+        // como salida por cuestiones de simplicidad
+        generarVariables();
         System.out.println(identificadorMain);
         generarCodigoFuncion(tercetos.get(identificadorMain), identificadorMain, identificadorMain); 
 
@@ -43,7 +44,6 @@ public class GeneradorCodigo {
         }
 
         tabs++;        
-        generarVariables(nombreFuncion);
         int contador = 0;
 
         for(Terceto t: tercetos){
@@ -52,7 +52,7 @@ public class GeneradorCodigo {
             contador++;
         }
         tabs--;
-        System.out.println("*************************************");
+        System.out.println("*************************************\n");
     }
 
     private static void getCodigoTerceto(Terceto t, String nombreFuncion){
@@ -60,12 +60,12 @@ public class GeneradorCodigo {
             case ":=":
                String tipo;
                 if (t.getOperando2().startsWith("[")){
-                    // System.out.println("\t".repeat(tabs) + "local.get $" + t.getOperando2());
-                    System.out.println("\t".repeat(tabs) + "local.set $" + t.getOperando1());
+                    // System.out.println("\t".repeat(tabs) + "global.get $" + t.getOperando2());
+                    System.out.println("\t".repeat(tabs) + "global.set $" + t.getOperando1());
                 } else {
                     tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                     System.out.println("\t".repeat(tabs) + tipo + ".const " + t.getOperando2());
-                    System.out.println("\t".repeat(tabs) + "local.set $" + t.getOperando1());
+                    System.out.println("\t".repeat(tabs) + "global.set $" + t.getOperando1());
                 }
                 break;
             
@@ -94,16 +94,26 @@ public class GeneradorCodigo {
         }
     }
 
-    private static void generarVariables(String nombreFuncion){
-        List<String> variablesFuncion = GeneradorCodigo.variables.get(nombreFuncion);
+    private static void generarVariables(){
 
-        System.out.println("---------------------------------------- Declaracion de variables locales");
-        if(variablesFuncion != null){
-            for(String v: variablesFuncion){
-                String tipo = (tablaSimbolos.get(v).get("TIPO").equals("INT"))?"i32":"f32";
-                System.out.println("\t".repeat(tabs) + "(local $" + v + " " + tipo  +")");
-            }
+
+        List<String> js = new ArrayList<String>();
+        System.out.println("  Declaracion de variables globales");
+        System.out.println("----------------------------------------");
+        for(String v: variablesFuncion){
+            String tipo = (tablaSimbolos.get(v).get("TIPO").equals("INT"))?"i32":"f32";
+            System.out.println("\t".repeat(tabs) + "(global $" + v + " (import \"js\" \"global." + v + "\") " + "(mut " + tipo + "))");
+            js.add("\"" + v + "\": new WebAssembly.Global({value:\'"+tipo+"\', mutable:true}, 0)");
         }
+        System.out.println("\n  Lo que se le agrega al js");
+        System.out.println("----------------------------------------");
+
+        for(String i: js.subList(0, js.size() - 1)){
+            System.out.println(i + ",");
+        }
+        System.out.println(js.get(js.size() - 1));
+        System.out.println("*************************************\n");
+
         
     }
 
@@ -113,7 +123,7 @@ public class GeneradorCodigo {
                 String tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 System.out.println("\t".repeat(tabs) + tipo + ".const " + t.getOperando2());
             } else {
-                System.out.println("\t".repeat(tabs) + "local.get $" + t.getOperando2());
+                System.out.println("\t".repeat(tabs) + "global.get $" + t.getOperando2());
             }
         }
 
@@ -126,7 +136,7 @@ public class GeneradorCodigo {
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 System.out.println("\t".repeat(tabs) + tipo + ".const " + t.getOperando1());
             } else {
-                System.out.println("\t".repeat(tabs) + "local.get $" + t.getOperando1());
+                System.out.println("\t".repeat(tabs) + "global.get $" + t.getOperando1());
             }
         }
         System.out.println("\t".repeat(tabs-1) + "  )");
@@ -141,7 +151,7 @@ public class GeneradorCodigo {
                 tipo1 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 System.out.println("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1());
             } else {
-                System.out.println("\t".repeat(tabs) + "local.get $" + t.getOperando1());
+                System.out.println("\t".repeat(tabs) + "global.get $" + t.getOperando1());
             }
         }
 
@@ -150,7 +160,7 @@ public class GeneradorCodigo {
                 tipo2 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 System.out.println("\t".repeat(tabs) + tipo2 + ".const " + t.getOperando2());
             } else {
-                System.out.println("\t".repeat(tabs) + "local.get $" + t.getOperando2());
+                System.out.println("\t".repeat(tabs) + "global.get $" + t.getOperando2());
             }
         }
 
@@ -163,7 +173,7 @@ public class GeneradorCodigo {
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 System.out.println("\t".repeat(tabs) + tipo + ".const " + t.getOperando1());
             } else {
-                System.out.println("\t".repeat(tabs) + "local.get $" + t.getOperando1());
+                System.out.println("\t".repeat(tabs) + "global.get $" + t.getOperando1());
             }
         } 
         System.out.println("\t".repeat(tabs) + "f32.convert_s/i32");

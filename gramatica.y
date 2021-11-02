@@ -163,7 +163,8 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {
                                 ;
 
 SENTENCIA_IF:                   IF CONDICION_IF THEN CUERPO_IF ENDIF ';'
-                                    {addEstructura("Sentencia IF");}
+                                    {addEstructura("Sentencia IF");
+                                    addTerceto(new Terceto("END_IF"));}
                                 ;
 
 CONDICION_IF:                   '(' CONDICION ')' { Terceto terceto = new Terceto("BF", $2.sval, null);
@@ -198,13 +199,15 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                         Terceto bifurcacionFalse = backpatching.pop();
                                         Terceto destinoBifurcacionIncondicional = backpatching.pop();
                                         String id = getAmbitoIdentificador($3.sval);
-                                        addTerceto(new Terceto("+", id, $11.sval));
+                                        // addTerceto(new Terceto("+", id, $11.sval));
+                                        addTercetoAritmetica("+",id,$11.sval);
                                         addTerceto(new Terceto(":=", id, getReferenciaUltimaInstruccion().sval));
                                         String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";
                                         addTerceto(new Terceto("BI", referenciaBI));
                                         // String referenciaBF = "[" + tercetos.size() + "]";
                                         String referenciaBF = "[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]";
                                         bifurcacionFalse.setOperando2(referenciaBF);
+                                        addTerceto(new Terceto("END_REPEAT"));
                                         }
                                 ;
 
@@ -306,7 +309,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     private Map<String,List<Terceto>> tercetos = new HashMap<String,List<Terceto>>();
     private Stack<Terceto> backpatching = new Stack<Terceto>();
     private boolean errorSemantico = false;
-    private Map<String,List<String>> variablesFunciones = new HashMap<String,List<String>>();
+    private List<String> variablesFunciones = new ArrayList<String>();
 
     
 
@@ -450,16 +453,16 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
             if (uso.equals("ID_VARIABLE")){
                 variables.add(identificador);
                 String funcion = getIdentificadorFuncionActual();
-                if(variablesFunciones.get(funcion) == null)
-                    variablesFunciones.put(funcion, new ArrayList<String>());
-                variablesFunciones.get(funcion).add(identificador);
+                // if(variablesFunciones.get(funcion) == null)
+                //     variablesFunciones.put(funcion, new ArrayList<String>());
+                variablesFunciones.add(identificador);
             }
                 
             addAtributoLexema(identificador,"USO",uso);
         }
     }
 
-    public Map<String,List<String>> getVariablesFunciones(){
+    public List<String> getVariablesFunciones(){
         return variablesFunciones;
     }
 
