@@ -14,7 +14,7 @@ yacc.exe
 y.output
 Parser.java
 ParserVal.java
-
+/wasm/*
 
 # Default ignored files
 /shelf/
