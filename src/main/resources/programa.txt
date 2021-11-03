@@ -22,7 +22,7 @@ BEGIN
     b := SINGLE(2 + 1) * SINGLE(a);
     
     b := myFunc(2);
-    //a := .;//
+    b := .3;
 
     a := 1;
 

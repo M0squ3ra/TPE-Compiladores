@@ -25,8 +25,15 @@ public class AccionSemantica5 implements AccionSemantica {
         String buffer = lexico.getBuffer();
         
         String convertedBuffer = buffer.replace('S', 'E');
+        BigDecimal valor = null;
+        try{
+            valor = new BigDecimal(convertedBuffer); 
+        } catch (NumberFormatException e){
+            Error error = new Error("Formato de numero no reconocido", false, lexico.getLinea());
+            lexico.addError(error);
 
-        BigDecimal valor = new BigDecimal(convertedBuffer); 
+            return TokensID.ERROR;
+        }
 
         // devolver la entrada leida.
         lexico.addSimboloEntradaInicio(c);
