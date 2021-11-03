@@ -14,10 +14,11 @@
 %}
 
 
-%token MAYOR_IGUAL MENOR_IGUAL IGUALDAD DIFERENTE CADENA AND OR IDENTIFICADOR ASIGNACION CTE ERROR INT IF THEN ELSE ENDIF PRINT FUNC RETURN BEGIN END BREAK SINGLE REPEAT PRE
+%token CADENA IDENTIFICADOR ASIGNACION CTE ERROR INT IF THEN ELSE ENDIF PRINT FUNC RETURN BEGIN END BREAK SINGLE REPEAT PRE
 
-%left '&&'
-%left '||'
+
+%left OR
+%left AND
 %left '<' '>' MAYOR_IGUAL MENOR_IGUAL IGUALDAD DIFERENTE
 
 %%
@@ -212,8 +213,6 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                         }
                                 ;
 
-
-
 CONDICION_REPEAT:               IDENTIFICADOR OPERADOR_COMPARADOR EXPRESION {Terceto terceto = new Terceto($2.sval, getAmbitoIdentificador($1.sval), $3.sval); addTerceto(terceto); backpatching.push(terceto); $$ = getReferenciaUltimaInstruccion();}
                                 ;
 
@@ -226,8 +225,22 @@ PRINT_ERROR:                    PRINT CADENA ')' ';' {yyerror("Falta el primer p
                                 | PRINT '(' CADENA ';' {yyerror("Falta el último paréntesis del PRINT.");}
                                 ;
 
-CONDICION:                      CONDICION OPERADOR_LOGICO EXPRESION { addTerceto(new Terceto($2.sval, $1.sval, $3.sval)); $$ = getReferenciaUltimaInstruccion();}
-                                | CONDICION OPERADOR_COMPARADOR EXPRESION {addTerceto(new Terceto($2.sval, $1.sval, $3.sval)); $$ = getReferenciaUltimaInstruccion();}
+CONDICION:                      CONDICION OR CONDICION_COMPARACION { 
+                                    if(checkTipos($1.sval, $3.sval))
+                                        addTerceto(new Terceto("||", $1.sval, $3.sval, "INT")); 
+                                    $$ = getReferenciaUltimaInstruccion();}
+                                | CONDICION AND CONDICION_COMPARACION { 
+                                    if(checkTipos($1.sval, $3.sval))
+                                        addTerceto(new Terceto("&&", $1.sval, $3.sval, "INT")); 
+                                    $$ = getReferenciaUltimaInstruccion();}
+                                | CONDICION_COMPARACION
+                                ;
+
+CONDICION_COMPARACION:          EXPRESION OPERADOR_COMPARADOR EXPRESION {
+                                            if(checkTipos($1.sval, $3.sval))
+                                                addTerceto(new Terceto($2.sval, $1.sval, $3.sval,"INT")); 
+                                            $$ = getReferenciaUltimaInstruccion();
+                                            }
                                 | EXPRESION { $$ = new ParserVal($1.sval); }
                                 ;
 
@@ -281,14 +294,10 @@ LLAMADO_FUNCION:                IDENTIFICADOR '(' EXPRESION ')' {String id = get
 
 OPERADOR_COMPARADOR:            '>' {$$ = new ParserVal(">");}
                                 | '<' {$$ = new ParserVal("<");}
-                                | MAYOR_IGUAL {$$ = new ParserVal($1.sval);}
-                                | MENOR_IGUAL {$$ = new ParserVal($1.sval);}
-                                | IGUALDAD {$$ = new ParserVal($1.sval);}
-                                | DIFERENTE { $$ = new ParserVal($1.sval); }
-                                ;
-
-OPERADOR_LOGICO:                AND { $$ = new ParserVal($1.sval); }
-                                | OR  {$$ = new ParserVal($1.sval); }
+                                | MAYOR_IGUAL {$$ = new ParserVal(">=");}
+                                | MENOR_IGUAL {$$ = new ParserVal("<=");}
+                                | IGUALDAD {$$ = new ParserVal("==");}
+                                | DIFERENTE { $$ = new ParserVal("<>"); }
                                 ;
 
 TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SINGLE");}
@@ -327,7 +336,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
         
         // En el caso que sea IDENTIFICADOR,CTE o STRING obtiene 
         // la referencia a la tabla de simbolos
-        if(token  == 261 || token == 264 || token == 266) 
+        if(token  == 258 || token == 260 || token == 257) 
             yylval = lexico.getyylval();
 	
         tokensReconocidos.add(token);

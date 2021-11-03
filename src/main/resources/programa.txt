@@ -1,28 +1,32 @@
 Mi_Progama;
 
 INT a;
+SINGLE b;
 
-INT FUNC myFunc2 (INT v)
+SINGLE FUNC myFunc(INT c)
 BEGIN
-    RETURN(2);
+    RETURN(SINGLE(2 + c));
 END;
 
-INT FUNC myFunc (INT var) 
-BEGIN
-    var := var + myFunc2(2);
-    RETURN(var);
-END;
 
 BEGIN
-    //IF (a < 1) THEN
+    IF (a <> 5 && 1.0 <> 6.1 || b && SINGLE(8)) THEN //me genera error de tipos por el problema de la precedencia// 
+    //IF (a || 2.1 + SINGLE(1 + 1)) THEN//
         a := a + 1;
     ELSE
         a := a - 1;
-    ENDIF;//
+    ENDIF;
+
+    //b := SINGLE (a * 1);
+    b := b * b;
+    b := SINGLE(2 + 1) / SINGLE(a);
+    b := SINGLE(2 + 1) * SINGLE(a);
+    //
+    
     //a := myFunc(SINGLE(a));//
 
-    PRINT(%Hola mundo%);
+    //PRINT(%Hola mundo%);
     a := myFunc(2);
-    PRINT(%Hola mundo2%);
+    PRINT(%Hola mundo2%);//
 
 END $

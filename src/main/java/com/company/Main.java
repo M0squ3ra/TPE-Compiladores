@@ -32,7 +32,7 @@ public class Main {
         //     System.out.println(i);
         // }
 
-        // // devuelve una lista pero yylex los reconoce a medida que se lo piden
+        // devuelve una lista pero yylex los reconoce a medida que se lo piden
         // System.out.println("\n Tokens Reconocidos (Orden -->)");
         // System.out.println("*------------------------------*");
         // for(Integer i: parser.getTokensReconocidos()){
@@ -54,15 +54,15 @@ public class Main {
         for(Error e: parser.getErroresSemanticos())
             System.out.println(e.toString());
 
-        System.out.println("\n Contenido de la tabla de simbolos");
-        System.out.println("*---------------------------------*");
+        // System.out.println("\n Contenido de la tabla de simbolos");
+        // System.out.println("*---------------------------------*");
         Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
-        for(String i: tablaSimbolos.keySet()){
-            System.out.println("[" + i + "]:");
-            Map<String, Object> atributos = tablaSimbolos.get(i);
-            for(String j: atributos.keySet())
-                System.out.println("    " + j + ": " + atributos.get(j));
-        }
+        // for(String i: tablaSimbolos.keySet()){
+        //     System.out.println("[" + i + "]:");
+        //     Map<String, Object> atributos = tablaSimbolos.get(i);
+        //     for(String j: atributos.keySet())
+        //         System.out.println("    " + j + ": " + atributos.get(j));
+        // }
 
         if(!parser.getError()){
             System.out.println("\n Tercetos - [Nro.Terceto][Tipo](Terceto)");
@@ -74,8 +74,8 @@ public class Main {
                 for(Terceto t: tercetos)
                     System.out.println("    [" +tercetos.indexOf(t) + "] " + t.toString());
             }
-            System.out.println("\n   Codigo generado");
-            System.out.println("*-------------------*");
+            // System.out.println("\n   Codigo generado");
+            // System.out.println("*-------------------*");
             GeneradorCodigo.setTablaSimbolos(tablaSimbolos);
             GeneradorCodigo.setVariables(parser.getVariablesFunciones());
             GeneradorCodigo.setCadenas(parser.getCadenas());

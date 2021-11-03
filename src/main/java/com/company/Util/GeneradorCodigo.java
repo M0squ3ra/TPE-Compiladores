@@ -237,7 +237,7 @@ public class GeneradorCodigo {
         
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
-                tipo1 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
+                tipo1 = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
             } else {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
@@ -298,6 +298,7 @@ public class GeneradorCodigo {
         }
         
         // 0 = false, 1 = true
+        // Las operaciones dan como resultado un i32
         switch (t.getOperador()) {
             case "<":
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".lt_s\n");
@@ -327,6 +328,9 @@ public class GeneradorCodigo {
     
     public static void generarCodigoOperacionLogica(String op, Terceto t){
         String tipo;
+        // Va a generar problemas cuando tenga como operador a una constante, variable o expresion de tipo SINGLE
+        // No asi con los tercetos de comparaciones u operaciones logicas ya que se almacenan 
+        // en variables auxiliares de tipo i32
         if (!t.getOperando1().startsWith("[")){
             tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
             if (Character.isDigit(t.getOperando1().charAt(0))){
@@ -348,6 +352,7 @@ public class GeneradorCodigo {
         } else{
             checkAux(t.getOperando2());
         }
+        // Las operaciones son bit a bit
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32." + op + "\n");
         generarVariableAuxiliar("i32");
     }
