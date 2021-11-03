@@ -11,17 +11,20 @@ END;
 
 BEGIN
     
-    IF (a <> 5 && 2.1 < SINGLE(4) || a > 6 && a <> 8 || a > 6 || 2 + 1 + 1|| 1) THEN
-        PRINT(%HOLA%);
+    //IF (a <> 5 && 2.1 < SINGLE(4) || a > 6 && a <> 8 || a > 6 || 2 + 1 + 1|| 1) THEN//
+    IF (a <> 5) THEN
+        PRINT(%HOLA chau%);
     ENDIF;
 
-    //b := SINGLE (a * 1);
+    b := SINGLE (a * 1);
     b := b * b;
     b := SINGLE(2 + 1) / SINGLE(a);
     b := SINGLE(2 + 1) * SINGLE(a);
-    //
     
-    //a := 1;//
+    b := myFunc(2);
+    //a := .;//
+
+    a := 1;
 
     //REPEAT (a := 1; a < 5; 1)
     BEGIN
@@ -32,4 +35,4 @@ BEGIN
     a := myFunc(2);
     PRINT(%Hola mundo2%);//
 
-END $
+END

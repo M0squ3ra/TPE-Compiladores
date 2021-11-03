@@ -159,7 +159,6 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {
 				                | BREAK ';' {addEstructura("BREAK"); addTerceto(new Terceto("BREAK"));}
                                 | SENTENCIA_IF
                                 | SENTENCIA_REPEAT
-                                | LLAMADO_FUNCION ';' {addEstructura("Llamado a funcion");}
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
                                 ;

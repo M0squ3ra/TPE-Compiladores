@@ -32,7 +32,7 @@ public class Main {
         //     System.out.println(i);
         // }
 
-        // devuelve una lista pero yylex los reconoce a medida que se lo piden
+        // Devuelve una lista pero yylex los reconoce a medida que se lo piden
         // System.out.println("\n Tokens Reconocidos (Orden -->)");
         // System.out.println("*------------------------------*");
         // for(Integer i: parser.getTokensReconocidos()){
