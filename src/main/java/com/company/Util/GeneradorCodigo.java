@@ -85,7 +85,8 @@ public class GeneradorCodigo {
         tabs++;        
         contador = 0;
         variablesAuxiliares.clear();
-
+        generarVariablesAuxiliares(tercetos);
+        contador = 0;
         for(Terceto t: tercetos){
             mainWat = mainWat.concat("\t".repeat(tabs-1) + ";; [" + contador + "] " + t.toString() + "\n");
             getCodigoTerceto(t, nombreFuncion);
@@ -250,9 +251,7 @@ public class GeneradorCodigo {
             }
         } 
         mainWat = mainWat.concat("\t".repeat(tabs) + "f32.convert_s/i32\n");
-        String nombreAux = "[" + contador + "].aux";
-        variablesAuxiliares.add(nombreAux);
-        mainWat = mainWat.concat("\t".repeat(tabs) + "(local $" + nombreAux + " f32)\n");
+        String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
         mainWat = mainWat.concat("\t".repeat(tabs) + "local.set $" + nombreAux + "\n");
         
     }
@@ -313,9 +312,20 @@ public class GeneradorCodigo {
         }
     }
     
+    public static void generarVariablesAuxiliares(List<Terceto> listaTercetos){
+        for(Terceto t: listaTercetos){
+            if(t.getOperador().equals("CONV")){
+                String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
+                variablesAuxiliares.add(nombreAux);
+                mainWat = mainWat.concat("\t".repeat(tabs) + "(local $" + nombreAux + " f32)\n");
+            }
+            contador++;
+        }
+    }
+
     public static void checkAux(String operando){
-        if(variablesAuxiliares.contains(operando.concat(".aux")))
-            mainWat = mainWat.concat("\t".repeat(tabs) + "local.get $" + operando.concat(".aux") + "\n");
+        if(variablesAuxiliares.contains("aux.".concat(operando).replace("[", "").replace("]", "")))
+            mainWat = mainWat.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(operando).replace("[", "").replace("]", "") + "\n");
     }
 
     public static void generarJs(String identificadorMain){
