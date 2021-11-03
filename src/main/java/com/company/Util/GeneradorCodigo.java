@@ -18,6 +18,7 @@ public class GeneradorCodigo {
     private static Map<String,Integer> cadenasMapeadas = new HashMap<String,Integer>();
     private static List<String> js = new ArrayList<String>();
     private static String mainWat = "";
+    private static String mainWatAux = "";
     private static String mainJs = "";
     private static List<String> variablesAuxiliares = new ArrayList<String>();
     private static int contador;
@@ -85,13 +86,13 @@ public class GeneradorCodigo {
         tabs++;        
         contador = 0;
         variablesAuxiliares.clear();
-        generarVariablesAuxiliares(tercetos);
-        contador = 0;
+        mainWatAux = "";
         for(Terceto t: tercetos){
-            mainWat = mainWat.concat("\t".repeat(tabs-1) + ";; [" + contador + "] " + t.toString() + "\n");
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs-1) + ";; [" + contador + "] " + t.toString() + "\n");
             getCodigoTerceto(t, nombreFuncion);
             contador++;
         }
+        mainWat = mainWat.concat(mainWatAux);
         if (nombreFuncion.equals(identificadorMain))
             mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n"); 
         
@@ -113,19 +114,19 @@ public class GeneradorCodigo {
                 break;
             
             case "+":
-                generarCodigoOperacionTermino("add", t);
+                generarCodigoOperacionAritmetica("add", t);
                 break;
             
             case "-":
-                generarCodigoOperacionTermino("sub", t);
+                generarCodigoOperacionAritmetica("sub", t);
                 break;
             
             case "*":
-                generarCodigoOperacionTermino("mul", t);
+                generarCodigoOperacionAritmetica("mul", t);
                 break;
             
             case "/":
-                generarCodigoOperacionTermino("div", t);
+                generarCodigoOperacionAritmetica("div", t);
                 break;
             
             case "CONV":
@@ -136,6 +137,13 @@ public class GeneradorCodigo {
                 generarCodigoPrint(t);
                 break;
             
+            case "||":
+                generarCodigoOperacionLogica("or",t);
+                break;
+            case "&&":
+                generarCodigoOperacionLogica("and",t);
+                break;
+
             case "<":
             case ">":
             case "<=":
@@ -188,51 +196,51 @@ public class GeneradorCodigo {
                 } else {
                     if (Character.isDigit(t.getOperando2().charAt(0))){
                         tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
-                        mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
+                        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
                     } else {
-                        mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+                        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
                     }
                 }
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
     }
 
     private static void generarCodigoLlamadoFuncion(Terceto t){
         if (!t.getOperando2().startsWith("[")){ // en caso de ser un terceto, el operando ya esta en la pila
             if (Character.isDigit(t.getOperando2().charAt(0))){
                 String tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         }
         
-        mainWat = mainWat.concat("\t".repeat(tabs) + "call $" + t.getOperando1() + "\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $" + t.getOperando1() + "\n");
     }
     
     private static void generarCodigoReturn(Terceto t){
         if (!t.getOperando1().startsWith("[")){ // en caso de ser un terceto, el ooperando ya esta en la pila
             if (Character.isDigit(t.getOperando1().charAt(0))){
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } else{
             checkAux(t.getOperando1());
         }
-        mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs-1) + "  )\n");
     }
     
-    private static void generarCodigoOperacionTermino(String operador, Terceto t ){
+    private static void generarCodigoOperacionAritmetica(String operador, Terceto t ){
         String tipo = (t.getTipo().equals("INT"))?"i32":"f32";
         String tipo1,tipo2;
         
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
                 tipo1 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } else {
             checkAux(t.getOperando1());
@@ -241,37 +249,29 @@ public class GeneradorCodigo {
         if (!t.getOperando2().startsWith("[")){
             if (Character.isDigit(t.getOperando2().charAt(0))){
                 tipo2 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo2 + ".const " + t.getOperando2() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo2 + ".const " + t.getOperando2() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         } else{
             checkAux(t.getOperando2());
         }
         
-        mainWat = mainWat.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
     }
     
     public static void generarCodigoConversion(Terceto t){
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } 
-        mainWat = mainWat.concat("\t".repeat(tabs) + "f32.convert_s/i32\n");
-        String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
-        mainWat = mainWat.concat("\t".repeat(tabs) + "local.set $" + nombreAux + "\n");
-        
-    }
-    
-    public static void generarCodigoPrint(Terceto t){
-        mainWat = mainWat.concat("\t".repeat(tabs) + "i32.const " + cadenasMapeadas.get(t.operando1) + "\n");
-        mainWat = mainWat.concat("\t".repeat(tabs) + "i32.const " + (cadenasMapeadas.get(t.operando1) + t.getOperando1().length() - 2) + "\n");
-        mainWat = mainWat.concat("\t".repeat(tabs) + "call $decode_print\n");
-    }
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "f32.convert_s/i32\n");
+        generarVariableAuxiliar("f32");
+    } 
     
     public static void generarCodigoComparacion(Terceto t){
         // El parser ya comprueba que los tipos de o1 y o2 sean el mismo
@@ -279,9 +279,9 @@ public class GeneradorCodigo {
         
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } else {
             checkAux(t.getOperando1());
@@ -289,9 +289,9 @@ public class GeneradorCodigo {
         
         if (!t.getOperando2().startsWith("[")){
             if (Character.isDigit(t.getOperando2().charAt(0))){
-                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
             } else {
-                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         } else{
             checkAux(t.getOperando2());
@@ -300,45 +300,76 @@ public class GeneradorCodigo {
         // 0 = false, 1 = true
         switch (t.getOperador()) {
             case "<":
-            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".lt_s\n");
-            break;
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".lt_s\n");
+                break;
             case ">":
-            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".gt_s\n");
-            break;
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".gt_s\n");
+                break;
             case "<=":
-            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".le_s\n");
-            break;
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".le_s\n");
+                break;
             case ">=":
-            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".ge_s\n");
-            break;
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".ge_s\n");
+                break;
             case "==":
-            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".eq\n");
-            break;
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".eq\n");
+                break;
             case "<>":
-            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".ne\n");
-            break;
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".ne\n");
+                break;
             
             default:
             break;
         }
+
+        generarVariableAuxiliar("i32");
     }
     
-    public static void generarVariablesAuxiliares(List<Terceto> listaTercetos){
-        for(Terceto t: listaTercetos){
-            if(t.getOperador().equals("CONV")){
-                String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
-                variablesAuxiliares.add(nombreAux);
-                mainWat = mainWat.concat("\t".repeat(tabs) + "(local $" + nombreAux + " f32)\n");
+    public static void generarCodigoOperacionLogica(String op, Terceto t){
+        String tipo;
+        if (!t.getOperando1().startsWith("[")){
+            tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
+            if (Character.isDigit(t.getOperando1().charAt(0))){
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
+            } else {
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
-            contador++;
+        } else {
+            checkAux(t.getOperando1());
         }
+        
+        if (!t.getOperando2().startsWith("[")){
+            tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
+            if (Character.isDigit(t.getOperando2().charAt(0))){
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
+            } else {
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+            }
+        } else{
+            checkAux(t.getOperando2());
+        }
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32." + op + "\n");
+        generarVariableAuxiliar("i32");
     }
 
+    public static void generarCodigoPrint(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + cadenasMapeadas.get(t.operando1) + "\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + (cadenasMapeadas.get(t.operando1) + t.getOperando1().length() - 2) + "\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $decode_print\n");
+    }
+
+    public static void generarVariableAuxiliar(String tipo){
+        String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
+        variablesAuxiliares.add(nombreAux);
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(local $" + nombreAux + " " + tipo + ")\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.set $" + nombreAux + "\n");
+    }
+    
     public static void checkAux(String operando){
         if(variablesAuxiliares.contains("aux.".concat(operando).replace("[", "").replace("]", "")))
-            mainWat = mainWat.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(operando).replace("[", "").replace("]", "") + "\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(operando).replace("[", "").replace("]", "") + "\n");
     }
-
+    
     public static void generarJs(String identificadorMain){
         mainJs = mainJs.concat(""
         .concat("let import_object = {\n")
