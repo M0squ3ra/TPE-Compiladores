@@ -22,9 +22,6 @@ public class AccionSemantica1 implements AccionSemantica {
         String buffer = lexico.getBuffer();
 
         switch (c) {
-            case '$':
-                token = TokensID.FIN_PROGRAMA;
-                break;
             case '(':
                 token = TokensID.PARENTESIS_ABRE;
                 break;

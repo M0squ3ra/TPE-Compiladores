@@ -32,6 +32,7 @@ public class Lexico {
     private static List<Character> data;
     private static Map<String, Map<String, Object>> tablaSimbolos;
     private static List<Error> errores;
+    private static boolean fin = false;
     
     
     public static Lexico getInstance(){
@@ -173,28 +174,35 @@ public class Lexico {
     
     public int yylex() throws IOException{
 
+        if(fin)
+            return 0;
+
         Character c;
         Integer estado = 0;
         Integer token = null;
+        boolean finArchivo = false;
 
-        while(token == null){
+        while(token == null && !finArchivo){
                             
             c = getSimboloEntrada();
 
             if (c == null) {
-                Error error = new Error("Error de sintaxis. Programa mal finalizado.", false, Lexico.linea);
-                Lexico.errores.add(error);
-                return 0;
+                // Error error = new Error("Error de sintaxis. Programa mal finalizado.", false, Lexico.linea);
+                // Lexico.errores.add(error);
+                finArchivo = true;
+            } else{
+                AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][getColumnaSimbolo(c)];
+                token = as.aplicarAccionSemantica(c);
+    
+                estado = matrizTransicion[estado][getColumnaSimbolo(c)];
+                
+                if (estado == -1 && token == null)
+                    token = TokensID.ERROR;
             }
-
-            AccionSemantica as = Lexico.matrizAccionesSemanticas[estado][getColumnaSimbolo(c)];
-            token = as.aplicarAccionSemantica(c);
-
-            estado = matrizTransicion[estado][getColumnaSimbolo(c)];
-            
-            if (estado == -1 && token == null)
-                token = TokensID.ERROR;
-            
+        }
+        if(finArchivo){
+            Lexico.fin = true;
+            return  TokensID.getTokenPalabraReservada(buffer);
         }
         return token;
     }

@@ -4,10 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TokensID {
-    // public static final
-    // los ids nos los va a dar la catedra, dicho por la jefa de catedra
-    public static final int FIN_PROGRAMA = 0;
-    
+        
     public static final int PARENTESIS_ABRE = 40; 
     public static final int PARENTESIS_CIERRA = 41; 
     public static final int POR = 42; 
