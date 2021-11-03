@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.company.Analizadores.Lexico;
+
 public class GeneradorCodigo {
 
     private static int tabs = 1;
@@ -22,6 +24,7 @@ public class GeneradorCodigo {
     private static String mainJs = "";
     private static List<String> variablesAuxiliares = new ArrayList<String>();
     private static int contador;
+    public static List<Terceto> tercetosActual;
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -35,6 +38,10 @@ public class GeneradorCodigo {
         GeneradorCodigo.cadenas = cadenas;
     }
 
+    public static Terceto getTerceto(String terceto){
+        return GeneradorCodigo.tercetosActual.get(Integer.parseInt(terceto.substring(1, terceto.length() - 1)));
+    }
+
     public static void generar(Map<String,List<Terceto>> tercetos, String identificadorMain){
         // Como los nombres de las variables en los tercetos conservan el ambito, se generaran solo variables globales
         // como salida por cuestiones de simplicidad
@@ -43,8 +50,9 @@ public class GeneradorCodigo {
         
         mainWat = mainWat.concat("\n;;  Funciones\n");
         mainWat = mainWat.concat(";; ----------------------------------------");
-
+        
         for (String nombreFuncion: tercetos.keySet()){
+            GeneradorCodigo.tercetosActual = tercetos.get(nombreFuncion);
             generarCodigoFuncion(tercetos.get(nombreFuncion), nombreFuncion, identificadorMain);
         }
         mainWat = mainWat.concat(")\n");
@@ -275,7 +283,14 @@ public class GeneradorCodigo {
     
     public static void generarCodigoComparacion(Terceto t){
         // El parser ya comprueba que los tipos de o1 y o2 sean el mismo
-        String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
+        String tipo;
+        if (!t.getOperando1().startsWith("[")){
+            tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
+        } else{
+            tipo = getTerceto(t.getOperando1()).getTipo();
+        }
+
+        // String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
         
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
@@ -361,6 +376,16 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + cadenasMapeadas.get(t.operando1) + "\n");
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + (cadenasMapeadas.get(t.operando1) + t.getOperando1().length() - 2) + "\n");
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $decode_print\n");
+    }
+
+    public static void generarCodigoInicioRepeat(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "REPEAT \n");
+        tabs++;
+    }
+
+    public static void generarCodigoFinRepeat(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "END_REPEAT \n");
+        tabs--;
     }
 
     public static void generarVariableAuxiliar(String tipo){

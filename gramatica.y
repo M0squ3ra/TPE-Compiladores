@@ -201,12 +201,10 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                         Terceto bifurcacionFalse = backpatching.pop();
                                         Terceto destinoBifurcacionIncondicional = backpatching.pop();
                                         String id = getAmbitoIdentificador($3.sval);
-                                        // addTerceto(new Terceto("+", id, $11.sval));
                                         addTercetoAritmetica("+",id,$11.sval);
                                         addTerceto(new Terceto(":=", id, getReferenciaUltimaInstruccion().sval));
                                         String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";
                                         addTerceto(new Terceto("BI", referenciaBI));
-                                        // String referenciaBF = "[" + tercetos.size() + "]";
                                         String referenciaBF = "[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]";
                                         bifurcacionFalse.setOperando2(referenciaBF);
                                         addTerceto(new Terceto("END_REPEAT"));
@@ -225,15 +223,22 @@ PRINT_ERROR:                    PRINT CADENA ')' ';' {yyerror("Falta el primer p
                                 | PRINT '(' CADENA ';' {yyerror("Falta el último paréntesis del PRINT.");}
                                 ;
 
-CONDICION:                      CONDICION OR CONDICION_COMPARACION { 
-                                    if(checkTipos($1.sval, $3.sval))
-                                        addTerceto(new Terceto("||", $1.sval, $3.sval, "INT")); 
-                                    $$ = getReferenciaUltimaInstruccion();}
-                                | CONDICION AND CONDICION_COMPARACION { 
-                                    if(checkTipos($1.sval, $3.sval))
-                                        addTerceto(new Terceto("&&", $1.sval, $3.sval, "INT")); 
-                                    $$ = getReferenciaUltimaInstruccion();}
-                                | CONDICION_COMPARACION
+CONDICION:                      CONDICION_OR {$$ = $1;}
+                                ;
+
+CONDICION_OR:                   CONDICION_OR OR CONDICION_AND { 
+                                            if(checkTipos($1.sval, $3.sval))
+                                                addTerceto(new Terceto("||", $1.sval, $3.sval, "INT")); 
+                                            $$ = getReferenciaUltimaInstruccion();}
+                                | CONDICION_AND {$$ = $1;}
+                                ;
+
+CONDICION_AND:                  CONDICION_AND AND CONDICION_COMPARACION { 
+                                            if(checkTipos($1.sval, $3.sval))
+                                                addTerceto(new Terceto("&&", $1.sval, $3.sval, "INT")); 
+                                            $$ = getReferenciaUltimaInstruccion();
+                                        }
+                                | CONDICION_COMPARACION {$$ = $1;}
                                 ;
 
 CONDICION_COMPARACION:          EXPRESION OPERADOR_COMPARADOR EXPRESION {
@@ -241,7 +246,7 @@ CONDICION_COMPARACION:          EXPRESION OPERADOR_COMPARADOR EXPRESION {
                                                 addTerceto(new Terceto($2.sval, $1.sval, $3.sval,"INT")); 
                                             $$ = getReferenciaUltimaInstruccion();
                                             }
-                                | EXPRESION { $$ = new ParserVal($1.sval); }
+                                | EXPRESION { $$ = $1; }
                                 ;
 
 CONVERSION:                     SINGLE '(' EXPRESION ')' { addTerceto(new Terceto("CONV", $3.sval, null, "SINGLE")); $$ = getReferenciaUltimaInstruccion();}

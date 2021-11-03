@@ -10,11 +10,9 @@ END;
 
 
 BEGIN
-    IF (a <> 5 && 1.0 <> 6.1 || b && SINGLE(8)) THEN //me genera error de tipos por el problema de la precedencia// 
-    //IF (a || 2.1 + SINGLE(1 + 1)) THEN//
-        a := a + 1;
-    ELSE
-        a := a - 1;
+    
+    IF (a <> 5 && 2.1 < SINGLE(4) || a > 6 && a <> 8 || a > 6 || 2 + 1 + 1|| 1) THEN
+        PRINT(%HOLA%);
     ENDIF;
 
     //b := SINGLE (a * 1);
@@ -23,7 +21,12 @@ BEGIN
     b := SINGLE(2 + 1) * SINGLE(a);
     //
     
-    //a := myFunc(SINGLE(a));//
+    //a := 1;//
+
+    //REPEAT (a := 1; a < 5; 1)
+    BEGIN
+        PRINT(%Hola%);
+    END//
 
     //PRINT(%Hola mundo%);
     a := myFunc(2);
