@@ -192,7 +192,7 @@ public class Lexico {
 
             estado = matrizTransicion[estado][getColumnaSimbolo(c)];
             
-            if (estado == -1)
+            if (estado == -1 && token == null)
                 token = TokensID.ERROR;
             
         }

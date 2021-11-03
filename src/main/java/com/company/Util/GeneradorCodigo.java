@@ -19,7 +19,8 @@ public class GeneradorCodigo {
     private static List<String> js = new ArrayList<String>();
     private static String mainWat = "";
     private static String mainJs = "";
-    private static String mainHtml = "";
+    private static List<String> variablesAuxiliares = new ArrayList<String>();
+    private static int contador;
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -49,9 +50,9 @@ public class GeneradorCodigo {
         
         generarJs(identificadorMain);
 
-        System.out.println("              main.wat"); 
-        System.out.println("+--------------------------------------+\n");
-        System.out.println(mainWat);
+        // System.out.println("              main.wat"); 
+        // System.out.println("+--------------------------------------+\n");
+        // System.out.println(mainWat);
         try {
             BufferedWriter brWat = new BufferedWriter(new FileWriter(new File("./wasm/main.wat")));
             brWat.write(mainWat);
@@ -59,9 +60,9 @@ public class GeneradorCodigo {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("              main.js"); 
-        System.out.println("+--------------------------------------+\n");
-        System.out.println(mainJs);
+        // System.out.println("              main.js"); 
+        // System.out.println("+--------------------------------------+\n");
+        // System.out.println(mainJs);
         try {
             BufferedWriter brJs = new BufferedWriter(new FileWriter(new File("./wasm/main.js")));
             brJs.write(mainJs);
@@ -82,7 +83,8 @@ public class GeneradorCodigo {
         }
 
         tabs++;        
-        int contador = 0;
+        contador = 0;
+        variablesAuxiliares.clear();
 
         for(Terceto t: tercetos){
             mainWat = mainWat.concat("\t".repeat(tabs-1) + ";; [" + contador + "] " + t.toString() + "\n");
@@ -124,6 +126,15 @@ public class GeneradorCodigo {
                 generarCodigoPrint(t);
                 break;
             
+            case "<":
+            case ">":
+            case "<=":
+            case ">=":
+            case "==":
+            case "<>":
+                generarCodigoComparacion(t);
+                break;
+            
             default:
                 break;
         }
@@ -163,12 +174,16 @@ public class GeneradorCodigo {
     private static void generarCodigoAsignacion(Terceto t){
         String tipo;
                 if (t.getOperando2().startsWith("[")){
-                    mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
+                    checkAux(t.getOperando2());
                 } else {
-                    tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
-                    mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
-                    mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
+                    if (Character.isDigit(t.getOperando2().charAt(0))){
+                        tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
+                        mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
+                    } else {
+                        mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+                    }
                 }
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".set $" + t.getOperando1() + "\n");
     }
 
     private static void generarCodigoLlamadoFuncion(Terceto t){
@@ -180,10 +195,10 @@ public class GeneradorCodigo {
                 mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         }
-
+        
         mainWat = mainWat.concat("\t".repeat(tabs) + "call $" + t.getOperando1() + "\n");
     }
-
+    
     private static void generarCodigoReturn(Terceto t){
         if (!t.getOperando1().startsWith("[")){ // en caso de ser un terceto, el ooperando ya esta en la pila
             if (Character.isDigit(t.getOperando1().charAt(0))){
@@ -195,11 +210,11 @@ public class GeneradorCodigo {
         }
         mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n");
     }
-
+    
     private static void generarCodigoOperacionTermino(String operador, Terceto t ){
         String tipo = (t.getTipo().equals("INT"))?"i32":"f32";
         String tipo1,tipo2;
-
+        
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
                 tipo1 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
@@ -207,8 +222,10 @@ public class GeneradorCodigo {
             } else {
                 mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
+        } else {
+            checkAux(t.getOperando1());
         }
-
+        
         if (!t.getOperando2().startsWith("[")){
             if (Character.isDigit(t.getOperando2().charAt(0))){
                 tipo2 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
@@ -216,11 +233,13 @@ public class GeneradorCodigo {
             } else {
                 mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
+        } else{
+            checkAux(t.getOperando2());
         }
-
+        
         mainWat = mainWat.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
     }
-
+    
     public static void generarCodigoConversion(Terceto t){
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0))){
@@ -231,6 +250,11 @@ public class GeneradorCodigo {
             }
         } 
         mainWat = mainWat.concat("\t".repeat(tabs) + "f32.convert_s/i32\n");
+        String nombreAux = "[" + contador + "].aux";
+        variablesAuxiliares.add(nombreAux);
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(local $" + nombreAux + " f32)\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "local.set $" + nombreAux + "\n");
+        
     }
     
     public static void generarCodigoPrint(Terceto t){
@@ -238,18 +262,73 @@ public class GeneradorCodigo {
         mainWat = mainWat.concat("\t".repeat(tabs) + "i32.const " + (cadenasMapeadas.get(t.operando1) + t.getOperando1().length() - 2) + "\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "call $decode_print\n");
     }
+    
+    public static void generarCodigoComparacion(Terceto t){
+        // El parser ya comprueba que los tipos de o1 y o2 sean el mismo
+        String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
+        
+        if (!t.getOperando1().startsWith("[")){
+            if (Character.isDigit(t.getOperando1().charAt(0))){
+                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
+            } else {
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+            }
+        } else {
+            checkAux(t.getOperando1());
+        }
+        
+        if (!t.getOperando2().startsWith("[")){
+            if (Character.isDigit(t.getOperando2().charAt(0))){
+                mainWat = mainWat.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
+            } else {
+                mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
+            }
+        } else{
+            checkAux(t.getOperando2());
+        }
+        
+        // 0 = false, 1 = true
+        switch (t.getOperador()) {
+            case "<":
+            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".lt_s\n");
+            break;
+            case ">":
+            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".gt_s\n");
+            break;
+            case "<=":
+            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".le_s\n");
+            break;
+            case ">=":
+            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".ge_s\n");
+            break;
+            case "==":
+            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".eq\n");
+            break;
+            case "<>":
+            mainWat = mainWat.concat("\t".repeat(tabs) + tipo +".ne\n");
+            break;
+            
+            default:
+            break;
+        }
+    }
+    
+    public static void checkAux(String operando){
+        if(variablesAuxiliares.contains(operando.concat(".aux")))
+            mainWat = mainWat.concat("\t".repeat(tabs) + "local.get $" + operando.concat(".aux") + "\n");
+    }
 
     public static void generarJs(String identificadorMain){
         mainJs = mainJs.concat(""
-            .concat("let import_object = {\n")
-            .concat("    \"js\":{\n")
-            .concat("          \"mem\": new WebAssembly.Memory({initial: 1}),\n")
-            .concat("          \"decode_print\": (start, end) => {\n")
-            .concat("              let typed_array = new Uint8Array(import_object.js.mem.buffer, start, end);\n")
-            .concat("              document.writeln(new TextDecoder(\"utf-8\").decode(typed_array) + \"<br>\");\n")
-            .concat("              },\n")
+        .concat("let import_object = {\n")
+        .concat("    \"js\":{\n")
+        .concat("          \"mem\": new WebAssembly.Memory({initial: 1}),\n")
+        .concat("          \"decode_print\": (start, end) => {\n")
+        .concat("              let typed_array = new Uint8Array(import_object.js.mem.buffer, start, end);\n")
+        .concat("              document.writeln(new TextDecoder(\"utf-8\").decode(typed_array) + \"<br>\");\n")
+        .concat("              },\n")
         );
-
+        
         for(String i: js.subList(0, js.size() - 1)){
             mainJs = mainJs.concat("           " + i + ",\n");
         }
@@ -257,13 +336,13 @@ public class GeneradorCodigo {
         mainJs = mainJs.concat("       }\n");
         mainJs = mainJs.concat("  };\n");
         mainJs = mainJs.concat(""
-            .concat("fetch(\"main.wasm\")\n")
-            .concat("  .then(response => response.arrayBuffer())\n")
-            .concat("  .then(bytes => WebAssembly.instantiate(bytes, import_object))\n")
-            .concat("  .then(result =>{\n")
-            .concat("      let exports = result.instance.exports;\n")
-            .concat("      exports." + identificadorMain + "();\n")
-            .concat("}).catch(console.error);\n")
+        .concat("fetch(\"main.wasm\")\n")
+        .concat("  .then(response => response.arrayBuffer())\n")
+        .concat("  .then(bytes => WebAssembly.instantiate(bytes, import_object))\n")
+        .concat("  .then(result =>{\n")
+        .concat("      let exports = result.instance.exports;\n")
+        .concat("      exports." + identificadorMain + "();\n")
+        .concat("}).catch(console.error);\n")
         );
     }
 }
