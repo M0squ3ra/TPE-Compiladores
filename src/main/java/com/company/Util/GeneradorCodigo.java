@@ -115,8 +115,17 @@ public class GeneradorCodigo {
             case "+":
                 generarCodigoOperacionTermino("add", t);
                 break;
+            
             case "-":
                 generarCodigoOperacionTermino("sub", t);
+                break;
+            
+            case "*":
+                generarCodigoOperacionTermino("mul", t);
+                break;
+            
+            case "/":
+                generarCodigoOperacionTermino("div", t);
                 break;
             
             case "CONV":
@@ -208,6 +217,8 @@ public class GeneradorCodigo {
             } else {
                 mainWat = mainWat.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
+        } else{
+            checkAux(t.getOperando1());
         }
         mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n");
     }
