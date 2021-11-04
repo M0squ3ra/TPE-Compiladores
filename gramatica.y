@@ -28,7 +28,7 @@ PROGRAMA:                       PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA BEGIN 
                                 | PROGRAMA_ERROR
 				                ;
 
-PROGRAMA_ENCABEZADO:            IDENTIFICADOR ';' {ambitoActual.add(0, $1.sval); addAtributoLexema($1.sval,"USO","Nombre de Programa");}
+PROGRAMA_ENCABEZADO:            IDENTIFICADOR ';' {ambitoActual.add(0, $1.sval); addAtributoLexema($1.sval,"USO","Nombre de Programa"); nombrePrograma = $1.sval;}
                                 ;
 
 PROGRAMA_ERROR:                 PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA {yyerror("Bloque principal no especificado.");}
@@ -376,6 +376,10 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
     public List<String> getCadenas(){
         return cadenas;
+    }
+
+    public String getNombrePrograma(){
+        return nombrePrograma;
     }
 
     public void addCadena(String cadena){

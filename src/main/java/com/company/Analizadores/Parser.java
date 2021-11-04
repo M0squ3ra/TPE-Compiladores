@@ -592,6 +592,10 @@ final static String yyrule[] = {
         return cadenas;
     }
 
+    public String getNombrePrograma(){
+        return nombrePrograma;
+    }
+
     public void addCadena(String cadena){
         cadenas.add(cadena);
     }
@@ -817,7 +821,7 @@ final static String yyrule[] = {
     }
     
 
-//#line 751 "Parser.java"
+//#line 755 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -973,7 +977,7 @@ boolean doaction;
 //########## USER-SUPPLIED ACTIONS ##########
 case 4:
 //#line 31 "gramatica.y"
-{ambitoActual.add(0, val_peek(1).sval); addAtributoLexema(val_peek(1).sval,"USO","Nombre de Programa");}
+{ambitoActual.add(0, val_peek(1).sval); addAtributoLexema(val_peek(1).sval,"USO","Nombre de Programa"); nombrePrograma = val_peek(1).sval;}
 break;
 case 5:
 //#line 34 "gramatica.y"
@@ -1380,7 +1384,7 @@ case 101:
 //#line 327 "gramatica.y"
 {tipo = "INT";  yyval = new ParserVal("INT");}
 break;
-//#line 1309 "Parser.java"
+//#line 1313 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

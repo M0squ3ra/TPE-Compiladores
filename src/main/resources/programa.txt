@@ -1,4 +1,4 @@
-Mi_Progama;
+Mi_programa_hello;
 
 //SINGLE a_2, _abc, b_1;//
 
@@ -8,7 +8,6 @@ INT a, b, c, d, e, f;
 
 BEGIN
 
-    a := .
     a := 1;
     
 
