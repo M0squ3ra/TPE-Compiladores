@@ -16,9 +16,11 @@ public class AccionSemanticaError implements AccionSemantica{
         
         Lexico lexico = Lexico.getInstance();
 
-        Error error = new Error("Error de sintaxis.", false, lexico.getLinea());
+        Error error = new Error("Error lexico.", false, lexico.getLinea());
 
         lexico.addError(error);
+
+        lexico.addSimboloEntradaInicio(c);
 
         return TokensID.ERROR;
     }

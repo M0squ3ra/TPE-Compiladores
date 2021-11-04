@@ -1,38 +1,24 @@
 Mi_Progama;
 
-INT a;
-SINGLE b;
+//SINGLE a_2, _abc, b_1;//
 
-SINGLE FUNC myFunc(INT c)
-BEGIN
-    RETURN(SINGLE(2 + c));
-END;
+//FLOAT FUNC errores_lexicos (INT props)//
 
+INT a, b, c, d, e, f;
 
 BEGIN
-    
-    //IF (a <> 5 && 2.1 < SINGLE(4) || a > 6 && a <> 8 || a > 6 || 2 + 1 + 1|| 1) THEN//
-    IF (a <> 5) THEN
-        PRINT(%HOLA chau%);
-    ENDIF;
 
-    b := SINGLE (a * 1);
-    b := b * b;
-    b := SINGLE(2 + 1) / SINGLE(a);
-    b := SINGLE(2 + 1) * SINGLE(a);
-    
-    b := myFunc(2);
-    b := .3;
-
+    a := .
     a := 1;
+    
 
-    //REPEAT (a := 1; a < 5; 1)
+    
+
+    REPEAT(a := 1; a < 5; 1)
     BEGIN
-        PRINT(%Hola%);
-    END//
+        BREAK;
+        PRINT(%HOLA%);
+    END
 
-    //PRINT(%Hola mundo%);
-    a := myFunc(2);
-    PRINT(%Hola mundo2%);//
 
 END

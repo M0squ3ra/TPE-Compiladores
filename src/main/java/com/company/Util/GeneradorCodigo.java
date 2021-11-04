@@ -378,16 +378,10 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $decode_print\n");
     }
 
-    public static void generarCodigoInicioRepeat(Terceto t){
-        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "REPEAT \n");
-        tabs++;
+    public static void generarCodigoIf(Terceto t){
+        
     }
-
-    public static void generarCodigoFinRepeat(Terceto t){
-        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "END_REPEAT \n");
-        tabs--;
-    }
-
+ 
     public static void generarVariableAuxiliar(String tipo){
         String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
         variablesAuxiliares.add(nombreAux);

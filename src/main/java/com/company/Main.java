@@ -25,19 +25,19 @@ public class Main {
         Parser parser = new Parser(false);
 		parser.yyparse();
 
-        // System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
-        // System.out.println(" Las estructuras que contienen errores no se muestran");
-        // System.out.println("*---------------------------------------------------------------------------*");
-        // for(String i: parser.getEstructurasReconocidas()){
-        //     System.out.println(i);
-        // }
+        System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
+        System.out.println(" Las estructuras que contienen errores no se muestran");
+        System.out.println("*---------------------------------------------------------------------------*");
+        for(String i: parser.getEstructurasReconocidas()){
+            System.out.println(i);
+        }
 
         // Devuelve una lista pero yylex los reconoce a medida que se lo piden
-        // System.out.println("\n Tokens Reconocidos (Orden -->)");
-        // System.out.println("*------------------------------*");
-        // for(Integer i: parser.getTokensReconocidos()){
-        //     System.out.print(i + " ");
-        // }
+        System.out.println("\n Tokens Reconocidos (Orden -->)");
+        System.out.println("*------------------------------*");
+        for(Integer i: parser.getTokensReconocidos()){
+            System.out.print(i + " ");
+        }
         
         System.out.println("\n\n Errores Lexicos");
         System.out.println("*---------------*");
@@ -54,15 +54,15 @@ public class Main {
         for(Error e: parser.getErroresSemanticos())
             System.out.println(e.toString());
 
-        // System.out.println("\n Contenido de la tabla de simbolos");
-        // System.out.println("*---------------------------------*");
+        System.out.println("\n Contenido de la tabla de simbolos");
+        System.out.println("*---------------------------------*");
         Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
-        // for(String i: tablaSimbolos.keySet()){
-        //     System.out.println("[" + i + "]:");
-        //     Map<String, Object> atributos = tablaSimbolos.get(i);
-        //     for(String j: atributos.keySet())
-        //         System.out.println("    " + j + ": " + atributos.get(j));
-        // }
+        for(String i: tablaSimbolos.keySet()){
+            System.out.println("[" + i + "]:");
+            Map<String, Object> atributos = tablaSimbolos.get(i);
+            for(String j: atributos.keySet())
+                System.out.println("    " + j + ": " + atributos.get(j));
+        }
 
         if(!parser.getError()){
             System.out.println("\n Tercetos - [Nro.Terceto][Tipo](Terceto)");
@@ -76,10 +76,10 @@ public class Main {
             }
             // System.out.println("\n   Codigo generado");
             // System.out.println("*-------------------*");
-            GeneradorCodigo.setTablaSimbolos(tablaSimbolos);
-            GeneradorCodigo.setVariables(parser.getVariablesFunciones());
-            GeneradorCodigo.setCadenas(parser.getCadenas());
-            GeneradorCodigo.generar(listasTercetos, "Mi_Progama"); // desharcodear id main
+            // GeneradorCodigo.setTablaSimbolos(tablaSimbolos);
+            // GeneradorCodigo.setVariables(parser.getVariablesFunciones());
+            // GeneradorCodigo.setCadenas(parser.getCadenas());
+            // GeneradorCodigo.generar(listasTercetos, "Mi_Progama"); // desharcodear id main
         }
     }
 

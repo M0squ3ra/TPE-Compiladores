@@ -32,8 +32,8 @@ PROGRAMA_ENCABEZADO:            IDENTIFICADOR ';' {ambitoActual.add(0, $1.sval);
                                 ;
 
 PROGRAMA_ERROR:                 PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA {yyerror("Bloque principal no especificado.");}
-                                | PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA BLOQUE_SENTENCIA END {yyerror("BEGIN del bloque principal no especificado.");}
-                                | PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA BEGIN BLOQUE_SENTENCIA {yyerror("END del bloque principal no especificado.");}
+                                | PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA CONJUNTO_SENTENCIAS END {yyerror("BEGIN del bloque principal no especificado.");}
+                                | PROGRAMA_ENCABEZADO SENTENCIA_DECLARATIVA BEGIN CONJUNTO_SENTENCIAS {yyerror("END del bloque principal no especificado.");}
                                 | PROGRAMA_ENCABEZADO error SENTENCIA_DECLARATIVA BEGIN CONJUNTO_SENTENCIAS END {yyerror("Falta el nombre del programa.");}
                                 ;
                                 	
@@ -91,7 +91,6 @@ PRECONDICION_FUNC:              PRE ':' '(' CONDICION ')' ',' CADENA ';' {
                                         Terceto bifurcacionIncondicional = new Terceto("BI", null);
                                         addTerceto(bifurcacionIncondicional);
                                         backpatching.push(bifurcacionIncondicional);
-                                        // bifurcacionTrue.setOperando2("[" + tercetos.size() + "]");
                                         bifurcacionTrue.setOperando2("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
                                         }
                                 ;
@@ -125,7 +124,16 @@ VARIABLES:                      VARIABLES ',' IDENTIFICADOR
                                     {verificarRedeclaracion($3.sval, "ID_VARIABLE");}
 				                | IDENTIFICADOR {verificarRedeclaracion($1.sval, "ID_VARIABLE");}
                                 ;
-                
+
+BLOQUE_SENTENCIA_REPEAT:        BEGIN CONJUNTO_SENTENCIAS_REPEAT END {addEstructura("Bloque de sentencias con BEGIN/END");}
+                                | SENTENCIA_EJECUTABLE_REPEAT
+                                | BLOQUE_SENTENCIA_REPEAT_ERROR
+                                ;
+
+BLOQUE_SENTENCIA_REPEAT_ERROR:  error CONJUNTO_SENTENCIAS_REPEAT END {yyerror("Falta el BEGIN del bloque de sentencia.");}
+                                | BEGIN CONJUNTO_SENTENCIAS_REPEAT error {yyerror("Falta el END del bloque de sentencia");}
+                                ;
+
 BLOQUE_SENTENCIA:               BEGIN CONJUNTO_SENTENCIAS END {addEstructura("Bloque de sentencias con BEGIN/END");}
                                 | SENTENCIA_EJECUTABLE
                                 | BLOQUE_SENTENCIA_ERROR
@@ -135,7 +143,15 @@ BLOQUE_SENTENCIA_ERROR:         error CONJUNTO_SENTENCIAS END {yyerror("Falta el
                                 | BEGIN CONJUNTO_SENTENCIAS error {yyerror("Falta el END del bloque de sentencia");}
                                 ;
 
+CONJUNTO_SENTENCIAS_REPEAT:     CONJUNTO_SENTENCIAS_REPEAT SENTENCIA_EJECUTABLE_REPEAT
+                                | SENTENCIA_EJECUTABLE_REPEAT
+                                ;
+
 CONJUNTO_SENTENCIAS:            CONJUNTO_SENTENCIAS SENTENCIA_EJECUTABLE
+                                | SENTENCIA_EJECUTABLE
+                                ;
+
+SENTENCIA_EJECUTABLE_REPEAT:    BREAK ';' {addEstructura("BREAK"); addTerceto(new Terceto("BREAK"));}
                                 | SENTENCIA_EJECUTABLE
                                 ;
 
@@ -156,11 +172,11 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {
                                       
                                 }
 				                | PRINT '(' CADENA ')' ';' {addEstructura("Sentencia PRINT"); addTerceto(new Terceto("PRINT", $3.sval + "%")); addCadena($3.sval + "%");}
-				                | BREAK ';' {addEstructura("BREAK"); addTerceto(new Terceto("BREAK"));}
                                 | SENTENCIA_IF
                                 | SENTENCIA_REPEAT
                                 | ASIGNACION_ERROR
                                 | PRINT_ERROR
+                                | error ';' {yyerrorSemantico("Sentencia no reconocida");}
                                 ;
 
 SENTENCIA_IF:                   IF CONDICION_IF THEN CUERPO_IF ENDIF ';'
@@ -177,14 +193,12 @@ CUERPO_IF:                      BLOQUE_SENTENCIA
                                 | BLOQUE_SENTENCIA ELSE
                                     {Terceto tercetoIncompleto = backpatching.pop(); 
                                     
-                                    // tercetoIncompleto.setOperando2("[" + (tercetos.size() + 1) + "]");
                                     tercetoIncompleto.setOperando2("[" + (tercetos.get(getIdentificadorFuncionActual()).size() + 1) + "]");
                                     Terceto bifurcacionIncondicional = new Terceto("BI", null);
                                     addTerceto(bifurcacionIncondicional);
                                     backpatching.push(bifurcacionIncondicional);}
                                     BLOQUE_SENTENCIA
                                     {Terceto tercetoIncompleto = backpatching.pop();
-                                    // tercetoIncompleto.setOperando1("[" + tercetos.size() + "]");}
                                     tercetoIncompleto.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");}
                                                         
                                 ; 
@@ -195,7 +209,7 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                 ';' CONDICION_REPEAT { 
                                             Terceto tercetoIncompleto = new Terceto("BF", $8.sval, null); 
                                             addTerceto(tercetoIncompleto); backpatching.push(tercetoIncompleto); } 
-                                ';' CTE ')' BLOQUE_SENTENCIA { 
+                                ';' CTE ')' BLOQUE_SENTENCIA_REPEAT { 
                                         addEstructura("Sentencia REPEAT");
                                         Terceto bifurcacionFalse = backpatching.pop();
                                         Terceto destinoBifurcacionIncondicional = backpatching.pop();
@@ -210,11 +224,16 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                         }
                                 ;
 
-CONDICION_REPEAT:               IDENTIFICADOR OPERADOR_COMPARADOR EXPRESION {Terceto terceto = new Terceto($2.sval, getAmbitoIdentificador($1.sval), $3.sval); addTerceto(terceto); backpatching.push(terceto); $$ = getReferenciaUltimaInstruccion();}
+CONDICION_REPEAT:               IDENTIFICADOR OPERADOR_COMPARADOR EXPRESION {
+                                    addTerceto(new Terceto("REPEAT"));
+                                    Terceto terceto = new Terceto($2.sval, getAmbitoIdentificador($1.sval), $3.sval); 
+                                    addTerceto(terceto); 
+                                    backpatching.push(terceto); 
+                                    $$ = getReferenciaUltimaInstruccion();}
                                 ;
 
 ASIGNACION_ERROR:               error ASIGNACION EXPRESION ';' {yyerror("Falta el identificador de la asignación.");}
-                                | IDENTIFICADOR ASIGNACION error ';' {yyerror("Falta la expresión en la asignación.");}
+                                | IDENTIFICADOR ASIGNACION ERROR ';' {yyerror("Falta la expresión en la asignación.");}
                                 ;
 
 PRINT_ERROR:                    PRINT CADENA ')' ';' {yyerror("Falta el primer paréntesis del PRINT.");}
@@ -322,7 +341,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     private List<String> ambitoActual = new ArrayList<String>();
     private Map<String,List<Terceto>> tercetos = new HashMap<String,List<Terceto>>();
     private Stack<Terceto> backpatching = new Stack<Terceto>();
-    private boolean errorSemantico = false;
+    private boolean err = false;
     private List<String> variablesFunciones = new ArrayList<String>();
     private List<String> cadenas = new ArrayList<String>();
 
@@ -342,6 +361,9 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
         // la referencia a la tabla de simbolos
         if(token  == 258 || token == 260 || token == 257) 
             yylval = lexico.getyylval();
+        
+        if(token == 261) // token error
+            err = true;
 	
         tokensReconocidos.add(token);
 
@@ -361,13 +383,14 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     }
 
     public void yyerror(String error){
+        err = true;
         Error e = new Error(error,false,lexico.getLinea());
         if (!erroresSintacticos.contains(e))
             erroresSintacticos.add(e);
     }
 
     public void yyerrorSemantico(String error){
-        errorSemantico = true;
+        err = true;
         Error e = new Error(error,false,lexico.getLinea());
         if(!erroresSemanticos.contains(e))
             erroresSemanticos.add(new Error(error,false,lexico.getLinea()));
@@ -565,7 +588,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     }
 
     public boolean getError(){
-        return errorSemantico;
+        return err;
     }
 
     public void checkRetornoFuncion(String expresion){
