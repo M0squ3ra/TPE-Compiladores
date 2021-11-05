@@ -4,10 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 import com.company.Analizadores.Lexico;
 
@@ -27,6 +31,7 @@ public class GeneradorCodigo {
     public static List<Terceto> tercetosActual;
     public static boolean flagRepeat = false;
     public static Terceto condicionRepeat;
+    public static List<String> operacionesExpresion = new ArrayList<String>(Arrays.asList("+","-","*","/","CONV"));
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -94,8 +99,10 @@ public class GeneradorCodigo {
         variablesAuxiliares.clear();
         mainWatAux = "";
         for(Terceto t: tercetos){
-            mainWatAux = mainWatAux.concat("\t" + ";; [" + contador + "] " + t.toString() + "\n");
-            getCodigoTerceto(t, nombreFuncion);
+            if(!operacionesExpresion.contains(t.getOperador())){
+                mainWatAux = mainWatAux.concat("\t" + ";; [" + contador + "] " + t.toString() + "\n");
+                getCodigoTerceto(t, nombreFuncion, "[" + contador + "]");
+            }
             contador++;
         }
         mainWat = mainWat.concat(mainWatAux);
@@ -105,7 +112,7 @@ public class GeneradorCodigo {
         tabs--;
     }
 
-    private static void getCodigoTerceto(Terceto t, String nombreFuncion){
+    private static void getCodigoTerceto(Terceto t, String nombreFuncion, String numeroTerceto){
         switch (t.getOperador()) {
             case ":=":
                generarCodigoAsignacion(t);
@@ -136,7 +143,7 @@ public class GeneradorCodigo {
                 break;
             
             case "CONV":
-                generarCodigoConversion(t);
+                generarCodigoConversion(t, numeroTerceto);
                 break;
             
             case "PRINT":
@@ -148,7 +155,7 @@ public class GeneradorCodigo {
                 break;
             
             case "END_REPEAT":
-                generarCodigoEndRepeat(t);
+                generarCodigoEndRepeat(t, numeroTerceto);
                 break;
             
             case "BF":
@@ -156,10 +163,10 @@ public class GeneradorCodigo {
                 break;
             
             case "||":
-                generarCodigoOperacionLogica("or",t);
+                generarCodigoOperacionLogica("or",t, numeroTerceto);
                 break;
             case "&&":
-                generarCodigoOperacionLogica("and",t);
+                generarCodigoOperacionLogica("and",t, numeroTerceto);
                 break;
 
             case "<":
@@ -171,7 +178,7 @@ public class GeneradorCodigo {
                 if(flagRepeat){
                     condicionRepeat = t; // Para comprobar la condicion dentro del loop
                 }
-                generarCodigoComparacion(t, false);
+                generarCodigoComparacion(t, false, numeroTerceto);
                 break;
             
             default:
@@ -213,6 +220,8 @@ public class GeneradorCodigo {
     private static void generarCodigoAsignacion(Terceto t){
         String tipo;
                 if (t.getOperando2().startsWith("[")){
+                    rearmarCadenaTercetos(t.getOperando2());
+                    mainWatAux = mainWatAux.concat("\t".repeat(2) +";; Operaciones de la propia asignacion\n");
                     checkAux(t.getOperando2());
                 } else {
                     if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
@@ -281,7 +290,7 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
     }
     
-    public static void generarCodigoConversion(Terceto t){
+    public static void generarCodigoConversion(Terceto t, String numeroTerceto){
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
@@ -291,10 +300,10 @@ public class GeneradorCodigo {
             }
         } 
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "f32.convert_s/i32\n");
-        generarVariableAuxiliar("f32");
+        generarVariableAuxiliar("f32", numeroTerceto);
     } 
     
-    public static void generarCodigoComparacion(Terceto t, boolean repeat){
+    public static void generarCodigoComparacion(Terceto t, boolean repeat, String numeroTerceto){
         // El parser ya comprueba que los tipos de o1 y o2 sean el mismo
         String tipo;
         if (!t.getOperando1().startsWith("[")){
@@ -303,6 +312,14 @@ public class GeneradorCodigo {
             tipo = getTerceto(t.getOperando1()).getTipo();
         }
 
+        if (t.getOperando1().startsWith("[")){
+            rearmarCadenaTercetos(t.getOperando2());
+            generarVariableAuxiliar(tipo, t.getOperando1());
+        }
+        if (t.getOperando2().startsWith("[")){
+            rearmarCadenaTercetos(t.getOperando2());
+            generarVariableAuxiliar(tipo, t.getOperando2());
+        }
         // String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
         
         if (!t.getOperando1().startsWith("[")){
@@ -312,7 +329,9 @@ public class GeneradorCodigo {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } else {
-            checkAux(t.getOperando1());
+            // rearmarCadenaTercetos(t.getOperando1());
+            // mainWatAux = mainWatAux.concat("\t".repeat(2) +";; Operaciones de la propia asignacion\n");
+            // checkAux(t.getOperando1());
         }
         
         if (!t.getOperando2().startsWith("[")){
@@ -322,8 +341,17 @@ public class GeneradorCodigo {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
         } else{
-            checkAux(t.getOperando2());
+            // rearmarCadenaTercetos(t.getOperando2());
+            // mainWatAux = mainWatAux.concat("\t".repeat(2) +";; Operaciones de la propia asignacion\n");
+            // checkAux(t.getOperando2());
         }
+
+        if (t.getOperando1().startsWith("["))
+            checkAux(t.getOperando1());
+
+        if (t.getOperando2().startsWith("["))
+            checkAux(t.getOperando2());
+
         
         String signed = "";
         if(tipo.equals("i32"))
@@ -355,10 +383,10 @@ public class GeneradorCodigo {
             break;
         }
         if(!repeat)
-            generarVariableAuxiliar("i32");
+            generarVariableAuxiliar("i32", numeroTerceto);
     }
     
-    public static void generarCodigoOperacionLogica(String op, Terceto t){
+    public static void generarCodigoOperacionLogica(String op, Terceto t, String numeroTerceto){
         String tipo;
         // Va a generar problemas cuando tenga como operador a una constante, variable o expresion de tipo SINGLE
         // No asi con los tercetos de comparaciones u operaciones logicas ya que se almacenan 
@@ -386,7 +414,7 @@ public class GeneradorCodigo {
         }
         // Las operaciones son bit a bit
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32." + op + "\n");
-        generarVariableAuxiliar("i32");
+        generarVariableAuxiliar("i32", numeroTerceto);
     }
 
     public static void generarCodigoPrint(Terceto t){
@@ -401,12 +429,12 @@ public class GeneradorCodigo {
         flagRepeat = true;
     }
 
-    public static void generarCodigoEndRepeat(Terceto t){
+    public static void generarCodigoEndRepeat(Terceto t, String numeroTerceto){
         // Rearmar la cadena de tercetos del operando 2 (la expresion de la comparacion)
         // en caso de ser necesario
         if(condicionRepeat.getOperando2().startsWith("["))
             rearmarCadenaTercetos(condicionRepeat.getOperando2());
-        generarCodigoComparacion(condicionRepeat, true);
+        generarCodigoComparacion(condicionRepeat, true, numeroTerceto);
         
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.eqz\n");
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 1\n");
@@ -429,16 +457,19 @@ public class GeneradorCodigo {
         tabs++;
     }
 
-    public static void generarVariableAuxiliar(String tipo){
-        String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
-        variablesAuxiliares.add(nombreAux);
-        mainWat = mainWat.concat("\t".repeat(tabs) + "(local $" + nombreAux + " " + tipo + ")\n");
+    public static void generarVariableAuxiliar(String tipo, String terceto){
+        // String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
+        String nombreAux = "aux.".concat(terceto).replace("[", "").replace("]", "");
+        if(!variablesAuxiliares.contains(nombreAux)){
+            variablesAuxiliares.add(nombreAux);
+            mainWat = mainWat.concat("\t".repeat(2) + "(local $" + nombreAux + " " + tipo + ")\n");
+        }
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.set $" + nombreAux + "\n");
     }
     
     public static void checkAux(String operando){
         if(variablesAuxiliares.contains("aux.".concat(operando).replace("[", "").replace("]", "")))
-        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(operando).replace("[", "").replace("]", "") + "\n");
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(operando).replace("[", "").replace("]", "") + "\n");
     }
 
     public static Terceto getTerceto(String terceto){
@@ -449,12 +480,20 @@ public class GeneradorCodigo {
         // Tengo que recorrer recursivamente el terceto y rearmar las operaciones
         // llamando a getCodigoTerceto(Terceto t, String nombreFuncion)
         Terceto t = getTerceto(terceto);
-        if(t.getOperando1().startsWith("["))
-            rearmarCadenaTercetos(t.getOperando1());
-        if(t.getOperando2().startsWith("["))
-            rearmarCadenaTercetos(t.getOperando2());
+        if(t.getOperando1() != null)
+            if(t.getOperando1().startsWith("["))
+                rearmarCadenaTercetos(t.getOperando1());
+        if(t.getOperando2() != null)
+            if(t.getOperando2().startsWith("["))
+                rearmarCadenaTercetos(t.getOperando2());
         
-        getCodigoTerceto(t, null);
+        // if(t.getOperando1() != null)     
+        //     checkAux(t.getOperando1());
+        // if(t.getOperando2() != null)     
+        //     checkAux(t.getOperando2());
+        
+        mainWatAux = mainWatAux.concat("\t\t" + ";; " + terceto + " " + t.toString() + "\n");
+        getCodigoTerceto(t, null, terceto);
     }
     
     public static void generarJs(String identificadorMain){
