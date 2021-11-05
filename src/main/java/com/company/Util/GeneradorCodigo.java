@@ -25,6 +25,8 @@ public class GeneradorCodigo {
     private static List<String> variablesAuxiliares = new ArrayList<String>();
     private static int contador;
     public static List<Terceto> tercetosActual;
+    public static boolean flagRepeat = false;
+    public static Terceto condicionRepeat;
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -36,10 +38,6 @@ public class GeneradorCodigo {
 
     public static void setCadenas(List<String> cadenas){
         GeneradorCodigo.cadenas = cadenas;
-    }
-
-    public static Terceto getTerceto(String terceto){
-        return GeneradorCodigo.tercetosActual.get(Integer.parseInt(terceto.substring(1, terceto.length() - 1)));
     }
 
     public static void generar(Map<String,List<Terceto>> tercetos, String identificadorMain){
@@ -96,13 +94,13 @@ public class GeneradorCodigo {
         variablesAuxiliares.clear();
         mainWatAux = "";
         for(Terceto t: tercetos){
-            mainWatAux = mainWatAux.concat("\t".repeat(tabs-1) + ";; [" + contador + "] " + t.toString() + "\n");
+            mainWatAux = mainWatAux.concat("\t" + ";; [" + contador + "] " + t.toString() + "\n");
             getCodigoTerceto(t, nombreFuncion);
             contador++;
         }
         mainWat = mainWat.concat(mainWatAux);
         if (nombreFuncion.equals(identificadorMain))
-            mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n"); 
+            mainWat = mainWat.concat("\t".repeat(tabs-1) + ")\n"); 
         
         tabs--;
     }
@@ -145,6 +143,18 @@ public class GeneradorCodigo {
                 generarCodigoPrint(t);
                 break;
             
+            case "REPEAT":
+                generarCodigoRepeatInicio(t);
+                break;
+            
+            case "END_REPEAT":
+                generarCodigoEndRepeat(t);
+                break;
+            
+            case "BF":
+                generarCodigoBF(t);
+                break;
+            
             case "||":
                 generarCodigoOperacionLogica("or",t);
                 break;
@@ -158,7 +168,10 @@ public class GeneradorCodigo {
             case ">=":
             case "==":
             case "<>":
-                generarCodigoComparacion(t);
+                if(flagRepeat){
+                    condicionRepeat = t; // Para comprobar la condicion dentro del loop
+                }
+                generarCodigoComparacion(t, false);
                 break;
             
             default:
@@ -281,7 +294,7 @@ public class GeneradorCodigo {
         generarVariableAuxiliar("f32");
     } 
     
-    public static void generarCodigoComparacion(Terceto t){
+    public static void generarCodigoComparacion(Terceto t, boolean repeat){
         // El parser ya comprueba que los tipos de o1 y o2 sean el mismo
         String tipo;
         if (!t.getOperando1().startsWith("[")){
@@ -312,20 +325,24 @@ public class GeneradorCodigo {
             checkAux(t.getOperando2());
         }
         
+        String signed = "";
+        if(tipo.equals("i32"))
+            signed = "_s";
+           
         // 0 = false, 1 = true
         // Las operaciones dan como resultado un i32
         switch (t.getOperador()) {
             case "<":
-                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".lt_s\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".lt" + signed + "\n");
                 break;
             case ">":
-                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".gt_s\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".gt" + signed + "\n");
                 break;
             case "<=":
-                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".le_s\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".le" + signed + "\n");
                 break;
             case ">=":
-                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".ge_s\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".ge" + signed + "\n");
                 break;
             case "==":
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo +".eq\n");
@@ -337,8 +354,8 @@ public class GeneradorCodigo {
             default:
             break;
         }
-
-        generarVariableAuxiliar("i32");
+        if(!repeat)
+            generarVariableAuxiliar("i32");
     }
     
     public static void generarCodigoOperacionLogica(String op, Terceto t){
@@ -378,10 +395,40 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $decode_print\n");
     }
 
-    public static void generarCodigoIf(Terceto t){
-        
+    public static void generarCodigoRepeatInicio(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+        tabs++;
+        flagRepeat = true;
     }
- 
+
+    public static void generarCodigoEndRepeat(Terceto t){
+        // Rearmar la cadena de tercetos del operando 2 (la expresion de la comparacion)
+        // en caso de ser necesario
+        if(condicionRepeat.getOperando2().startsWith("["))
+            rearmarCadenaTercetos(condicionRepeat.getOperando2());
+        generarCodigoComparacion(condicionRepeat, true);
+        
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.eqz\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 1\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br 0\n");
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+    }
+    
+    public static void generarCodigoBF(Terceto t){
+        checkAux(t.getOperando1());
+
+        if(flagRepeat){
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.eqz\n");
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(loop\n");
+            flagRepeat = false;    
+        }
+        tabs++;
+    }
+
     public static void generarVariableAuxiliar(String tipo){
         String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
         variablesAuxiliares.add(nombreAux);
@@ -392,6 +439,22 @@ public class GeneradorCodigo {
     public static void checkAux(String operando){
         if(variablesAuxiliares.contains("aux.".concat(operando).replace("[", "").replace("]", "")))
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(operando).replace("[", "").replace("]", "") + "\n");
+    }
+
+    public static Terceto getTerceto(String terceto){
+        return GeneradorCodigo.tercetosActual.get(Integer.parseInt(terceto.substring(1, terceto.length() - 1)));
+    }
+
+    public static void rearmarCadenaTercetos(String terceto){
+        // Tengo que recorrer recursivamente el terceto y rearmar las operaciones
+        // llamando a getCodigoTerceto(Terceto t, String nombreFuncion)
+        Terceto t = getTerceto(terceto);
+        if(t.getOperando1().startsWith("["))
+            rearmarCadenaTercetos(t.getOperando1());
+        if(t.getOperando2().startsWith("["))
+            rearmarCadenaTercetos(t.getOperando2());
+        
+        getCodigoTerceto(t, null);
     }
     
     public static void generarJs(String identificadorMain){

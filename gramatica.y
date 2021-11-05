@@ -205,7 +205,12 @@ CUERPO_IF:                      BLOQUE_SENTENCIA
 
 SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                             String id = getAmbitoIdentificador($3.sval); 
-                                            addTerceto(new Terceto(":=", id, $5.sval)); } 
+                                            if(!getTipo(id).equals("INT"))
+                                                yyerrorSemantico("La variable debe ser de tipo entero");
+                                            addTerceto(new Terceto(":=", id, $5.sval)); 
+                                            addTerceto(new Terceto("REPEAT"));
+                                            } 
+
                                 ';' CONDICION_REPEAT { 
                                             Terceto tercetoIncompleto = new Terceto("BF", $8.sval, null); 
                                             addTerceto(tercetoIncompleto); backpatching.push(tercetoIncompleto); } 
@@ -225,7 +230,9 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                 ;
 
 CONDICION_REPEAT:               IDENTIFICADOR OPERADOR_COMPARADOR EXPRESION {
-                                    addTerceto(new Terceto("REPEAT"));
+                                    if(!getTipo($3.sval).equals("INT"))
+                                        yyerrorSemantico("La expresion debe ser de tipo entero");
+                                    
                                     Terceto terceto = new Terceto($2.sval, getAmbitoIdentificador($1.sval), $3.sval); 
                                     addTerceto(terceto); 
                                     backpatching.push(terceto); 
