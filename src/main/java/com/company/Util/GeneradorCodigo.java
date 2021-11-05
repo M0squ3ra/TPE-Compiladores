@@ -139,7 +139,7 @@ public class GeneradorCodigo {
                 break;
             
             case "/":
-                generarCodigoOperacionAritmetica("div", t);
+                generarCodigoOperacionAritmetica("div_s", t);
                 break;
             
             case "CONV":
