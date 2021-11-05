@@ -139,7 +139,7 @@ public class GeneradorCodigo {
                 break;
             
             case "/":
-                generarCodigoOperacionAritmetica("div_s", t);
+                generarCodigoOperacionAritmetica("div", t);
                 break;
             
             case "CONV":
@@ -286,6 +286,9 @@ public class GeneradorCodigo {
         } else{
             checkAux(t.getOperando2());
         }
+
+        if(tipo.equals("i32") && operador.equals("div"))
+            operador = operador + "_s";
         
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
     }
