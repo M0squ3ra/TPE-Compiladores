@@ -184,7 +184,8 @@ SENTENCIA_IF:                   IF CONDICION_IF THEN CUERPO_IF ENDIF ';'
                                     addTerceto(new Terceto("END_IF"));}
                                 ;
 
-CONDICION_IF:                   '(' CONDICION ')' { Terceto terceto = new Terceto("BF", $2.sval, null);
+CONDICION_IF:                   '(' CONDICION ')' { 
+                                                    Terceto terceto = new Terceto("BF", $2.sval, null);
                                                     addTerceto(terceto);
                                                     backpatching.push(terceto); }
                                 ;

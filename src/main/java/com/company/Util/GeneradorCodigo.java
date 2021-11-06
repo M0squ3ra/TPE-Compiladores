@@ -30,8 +30,10 @@ public class GeneradorCodigo {
     private static int contador;
     public static List<Terceto> tercetosActual;
     public static boolean flagRepeat = false;
+    public static boolean flagElse = false;
     public static Terceto condicionRepeat;
     public static List<String> operacionesExpresion = new ArrayList<String>(Arrays.asList("+","-","*","/","CONV"));
+    private static String mensajeError = "%Error - No se puede dividir por cero%";
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -151,15 +153,24 @@ public class GeneradorCodigo {
                 break;
             
             case "REPEAT":
-                generarCodigoRepeatInicio(t);
+                flagRepeat = true;
+                generarCodigoInicioRepeat();
                 break;
             
             case "END_REPEAT":
                 generarCodigoEndRepeat(t, numeroTerceto);
                 break;
             
+            case "END_IF":
+                generarCodigoEndIf();
+                break;
+            
             case "BF":
                 generarCodigoBF(t);
+                break;
+        
+            case "BI":
+                generarCodigoBI(t);
                 break;
             
             case "||":
@@ -192,7 +203,8 @@ public class GeneradorCodigo {
         mainWat = mainWat.concat(";; ----------------------------------------\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"mem\" (memory 1))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"decode_print\" (func $decode_print (param i32 i32)))\n");
-       
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_div_cero\" (func $error_div_cero))\n");
+        
         
         mainWat = mainWat.concat("\n;;  Declaracion de variables globales\n");
         mainWat = mainWat.concat(";; ----------------------------------------\n");
@@ -210,6 +222,7 @@ public class GeneradorCodigo {
             mainWat = mainWat.concat("\t".repeat(tabs) + "(data (i32.const " + sumaCadenas + ") \"" + cadena.substring(1,cadena.length()-1) + "\")\n");
             sumaCadenas += cadena.length() - 2; // quito los %
         }
+        cadenasMapeadas.put(mensajeError, sumaCadenas);
                 
     }
 
@@ -263,18 +276,32 @@ public class GeneradorCodigo {
     
     private static void generarCodigoOperacionAritmetica(String operador, Terceto t ){
         String tipo = (t.getTipo().equals("INT"))?"i32":"f32";
-        String tipo1,tipo2;
-        
+        String tipo1,tipo2; // Redundante, ya se chequea durante la generacion de tercetos
+        // String op1 = "";
+
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
                 tipo1 = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
+                // if(!operador.equals("div"))
+                    mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
+                // if(operador.equals("div"))
+                //     op1 = op1.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
+                
             } else {
-                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+                // if(!operador.equals("div"))
+                    mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
+                // if(operador.equals("div"))
+                //     op1 = op1.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } else {
-            checkAux(t.getOperando1());
+            // if(!operador.equals("div"))
+                checkAux(t.getOperando1());
+            // if(operador.equals("div"))
+            //     op1 = op1.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(t.getOperando1().replace("[", "").replace("]", "") + "\n"));
         }
+
+        if(operador.equals("div"))
+            generarVariableAuxiliar(tipo, "op1." + tipo);
         
         if (!t.getOperando2().startsWith("[")){
             if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
@@ -283,8 +310,12 @@ public class GeneradorCodigo {
             } else {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
             }
+            if(operador.equals("div"))
+                generarCodigoComprobacionDivCero(tipo,"op1." + tipo);
         } else{
             checkAux(t.getOperando2());
+            if(operador.equals("div"))
+                generarCodigoComprobacionDivCero(tipo,"op1." + tipo);
         }
 
         if(tipo.equals("i32") && operador.equals("div"))
@@ -292,7 +323,31 @@ public class GeneradorCodigo {
         
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
     }
-    
+
+    public static void generarCodigoComprobacionDivCero(String tipo, String op1){
+        String nombreVarAuxiliar = tipo.equals("i32")?"div.i32":"div.f32";
+        generarVariableAuxiliar(tipo,nombreVarAuxiliar); // guardo del divisor
+
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+        tabs++;
+
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $aux." + nombreVarAuxiliar + "\n");
+        if(tipo.equals("i32"))
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const 0\n");
+        else 
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "f32.const 0.0\n");
+        
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".eq\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const 1\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.xor\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $error_div_cero\n");
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $aux." + op1 +"\n"); // restauro el valor del operando 1
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $aux." + nombreVarAuxiliar + "\n"); // restauro el valor del operando 2
+    }
+
     public static void generarCodigoConversion(Terceto t, String numeroTerceto){
         if (!t.getOperando1().startsWith("[")){
             if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
@@ -426,10 +481,9 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $decode_print\n");
     }
 
-    public static void generarCodigoRepeatInicio(Terceto t){
+    public static void generarCodigoInicioRepeat(){
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
         tabs++;
-        flagRepeat = true;
     }
 
     public static void generarCodigoEndRepeat(Terceto t, String numeroTerceto){
@@ -447,17 +501,42 @@ public class GeneradorCodigo {
         tabs--;
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
     }
+ 
+    public static void generarCodigoEndIf(){
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+    }
     
     public static void generarCodigoBF(Terceto t){
-        checkAux(t.getOperando1());
-
-        if(flagRepeat){
+        
+        if(flagRepeat){ // Para saber si se trata de la condicion de un repeat o no
+            checkAux(t.getOperando1());
             mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.eqz\n");
             mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
             mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(loop\n");
             flagRepeat = false;    
+            tabs++;
+        } else{
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+            tabs++;
+            if(t.getOperando2() == null){
+                checkAux(t.getOperando1());
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.eqz\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+            } else{
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+                tabs++;
+                checkAux(t.getOperando1());
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.eqz\n");
+                mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+                flagElse = true;
+            }
         }
-        tabs++;
+    }
+    public static void generarCodigoBI(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br 1\n");
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
     }
 
     public static void generarVariableAuxiliar(String tipo, String terceto){
@@ -508,12 +587,17 @@ public class GeneradorCodigo {
         .concat("              let typed_array = new Uint8Array(import_object.js.mem.buffer, start, end);\n")
         .concat("              document.writeln(new TextDecoder(\"utf-8\").decode(typed_array) + \"<br>\");\n")
         .concat("              },\n")
+        .concat("          \"error_div_cero\": () => {\n")
+        .concat("              document.writeln(\"Error - Dvision por cero<br>\");\n")
+        .concat("              throw new WebAssembly.RuntimeError(\"Error - Division por cero\");\n")
+        
+        .concat("          },\n")
         );
         
         for(String i: js.subList(0, js.size() - 1)){
-            mainJs = mainJs.concat("           " + i + ",\n");
+            mainJs = mainJs.concat("          " + i + ",\n");
         }
-        mainJs = mainJs.concat("           " + js.get(js.size() - 1) + "\n");
+        mainJs = mainJs.concat("          " + js.get(js.size() - 1) + "\n");
         mainJs = mainJs.concat("       }\n");
         mainJs = mainJs.concat("  };\n");
         mainJs = mainJs.concat(""
