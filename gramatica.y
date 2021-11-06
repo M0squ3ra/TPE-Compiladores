@@ -67,17 +67,8 @@ DECLARACION_FUNC:               ENCABEZADO_FUNC SENTENCIA_DECLARATIVA CUERPO_FUN
 
 CUERPO_FUNC:                    BEGIN CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';'
                                 | BEGIN RETURN_FUNC ';' END ';'
-                                | BEGIN PRECONDICION_FUNC CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';' {
-                                    Terceto bifurcacionIncondicional = backpatching.pop();
-                                    // bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
-                                    bifurcacionIncondicional.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
-                                    
-                                }
-                                | BEGIN PRECONDICION_FUNC RETURN_FUNC ';' END ';' {
-                                    Terceto bifurcacionIncondicional = backpatching.pop();
-                                    // bifurcacionIncondicional.setOperando1("[" + tercetos.size() + "]");
-                                    bifurcacionIncondicional.setOperando1("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
-                                }
+                                | BEGIN PRECONDICION_FUNC CONJUNTO_SENTENCIAS RETURN_FUNC ';' END ';' 
+                                | BEGIN PRECONDICION_FUNC RETURN_FUNC ';' END ';' 
                                 ;
     
 RETURN_FUNC:                    RETURN '(' EXPRESION ')' {checkRetornoFuncion($3.sval); addTerceto(new Terceto("RETURN_FUNC", $3.sval, null, getTipo($3.sval)));}
@@ -88,9 +79,10 @@ PRECONDICION_FUNC:              PRE ':' '(' CONDICION ')' ',' CADENA ';' {
                                         addTerceto(bifurcacionTrue);
                                         addTerceto(new Terceto("PRINT", $7.sval + "%"));
                                         addCadena($7.sval + "%");
-                                        Terceto bifurcacionIncondicional = new Terceto("BI", null);
-                                        addTerceto(bifurcacionIncondicional);
-                                        backpatching.push(bifurcacionIncondicional);
+                                        // Terceto bifurcacionIncondicional = new Terceto("END_PRE", null);
+                                        addTerceto(new Terceto("END_PRE", null));
+                                        // addTerceto(bifurcacionIncondicional);
+                                        // backpatching.push(bifurcacionIncondicional);
                                         bifurcacionTrue.setOperando2("[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]");
                                         }
                                 ;

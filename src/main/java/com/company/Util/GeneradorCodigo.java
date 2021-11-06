@@ -32,7 +32,7 @@ public class GeneradorCodigo {
     public static boolean flagRepeat = false;
     public static boolean flagElse = false;
     public static Terceto condicionRepeat;
-    public static List<String> operacionesExpresion = new ArrayList<String>(Arrays.asList("+","-","*","/","CONV"));
+    public static List<String> operacionesExpresion = new ArrayList<String>(Arrays.asList("+","-","*","/","CONV","CALL_FUNC"));
     private static String mensajeError = "%Error - No se puede dividir por cero%";
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
@@ -164,6 +164,14 @@ public class GeneradorCodigo {
             case "END_IF":
                 generarCodigoEndIf();
                 break;
+
+            case "END_PRE":
+                generarCodigoEndPre();
+                break;
+
+            case "BT":
+                generarCodigoBT(t);
+                break;
             
             case "BF":
                 generarCodigoBF(t);
@@ -204,6 +212,7 @@ public class GeneradorCodigo {
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"mem\" (memory 1))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"decode_print\" (func $decode_print (param i32 i32)))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_div_cero\" (func $error_div_cero))\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"incumplimiento_pre\" (func $incumplimiento_pre))\n");
         
         
         mainWat = mainWat.concat("\n;;  Declaracion de variables globales\n");
@@ -507,6 +516,19 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
     }
     
+    public static void generarCodigoEndPre(){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $incumplimiento_pre\n"); 
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+    }
+
+    public static void generarCodigoBT(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+        tabs++;
+        checkAux(t.getOperando1());
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+    }
+
     public static void generarCodigoBF(Terceto t){
         
         if(flagRepeat){ // Para saber si se trata de la condicion de un repeat o no
@@ -533,6 +555,7 @@ public class GeneradorCodigo {
             }
         }
     }
+    
     public static void generarCodigoBI(Terceto t){
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br 1\n");
         tabs--;
@@ -590,7 +613,9 @@ public class GeneradorCodigo {
         .concat("          \"error_div_cero\": () => {\n")
         .concat("              document.writeln(\"Error - Dvision por cero<br>\");\n")
         .concat("              throw new WebAssembly.RuntimeError(\"Error - Division por cero\");\n")
-        
+        .concat("          },\n")
+        .concat("          \"incumplimiento_pre\": () => {\n")
+        .concat("              throw new WebAssembly.RuntimeError(\"Incumplimiento de precondicion\");\n")
         .concat("          },\n")
         );
         
