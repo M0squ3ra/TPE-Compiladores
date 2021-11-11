@@ -1,7 +1,15 @@
 Mi_programa_hello;
 
 INT a, b;
-INT FUNC (INT) varf1, varf2;
+INT FUNC (INT) varf1;
+SINGLE c;
+SINGLE FUNC (INT) varf2;
+
+INT FUNC myFunc2(INT g)
+BEGIN
+    PRE: (g <= 3), %Error - soy mayor a 3%;
+    RETURN(g + 1);
+END;
 
 INT FUNC myFunc(INT g)
 BEGIN
@@ -10,19 +18,19 @@ BEGIN
 END;
 
 BEGIN
-    //a := myFunc(2);
+
     varf1 := myFunc;
-    a := 1;//
-    //a := var1(2);
-    a := var1(2) + 1;
-    a := 1 + var1(2) + 1;//
-    varf1 := myFunc;
-    a := myFunc(2);
     a := varf1(2);
+    IF (a == 2) THEN
+        PRINT(%es igual a 2%);
+    ENDIF;
 
-
-    IF (2 + 1 <> 2) THEN
-        PRINT(%hola%);
+    varf1 := myFunc2;
+    a := varf1(2);
+    IF (a == 2) THEN
+        PRINT(%Igual a 2%);
+    ELSE 
+        PRINT(%Distinto de 2%);
     ENDIF;
 
 END
