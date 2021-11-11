@@ -4,16 +4,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.namespace.QName;
-
-import com.company.Analizadores.Lexico;
 
 public class GeneradorCodigo {
 
@@ -33,7 +28,6 @@ public class GeneradorCodigo {
     public static boolean flagElse = false;
     public static Terceto condicionRepeat;
     public static List<String> operacionesExpresion = new ArrayList<String>(Arrays.asList("+","-","*","/","CONV","CALL_FUNC"));
-    private static String mensajeError = "%Error - No se puede dividir por cero%";
 
     public static void setTablaSimbolos(Map<String,Map<String,Object>> tablaSimbolos){
         GeneradorCodigo.tablaSimbolos = tablaSimbolos;
@@ -48,8 +42,8 @@ public class GeneradorCodigo {
     }
 
     public static void generar(Map<String,List<Terceto>> tercetos, String identificadorMain){
-        // Como los nombres de las variables en los tercetos conservan el ambito, se generaran solo variables globales
-        // como salida por cuestiones de simplicidad
+        // Como los nombres de las variables en los tercetos conservan el ambito, se generaran 
+        // solo variables globales como salida por cuestiones de simplicidad
         mainWat = mainWat.concat("(module\n");
         generarVariables();
         
@@ -213,6 +207,8 @@ public class GeneradorCodigo {
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"decode_print\" (func $decode_print (param i32 i32)))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_div_cero\" (func $error_div_cero))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"incumplimiento_pre\" (func $incumplimiento_pre))\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_prod_overflow\" (func $error_prod_overflow))\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_recursion_mutua\" (func $error_recursion_mutua))\n");
         
         
         mainWat = mainWat.concat("\n;;  Declaracion de variables globales\n");
@@ -230,9 +226,7 @@ public class GeneradorCodigo {
             cadenasMapeadas.put(cadena, sumaCadenas);
             mainWat = mainWat.concat("\t".repeat(tabs) + "(data (i32.const " + sumaCadenas + ") \"" + cadena.substring(1,cadena.length()-1) + "\")\n");
             sumaCadenas += cadena.length() - 2; // quito los %
-        }
-        cadenasMapeadas.put(mensajeError, sumaCadenas);
-                
+        }                
     }
 
     private static String getModoObjeto(String operando){
@@ -246,7 +240,7 @@ public class GeneradorCodigo {
                     mainWatAux = mainWatAux.concat("\t".repeat(2) +";; Operaciones de la propia asignacion\n");
                     checkAux(t.getOperando2());
                 } else {
-                    if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
+                    if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".") || t.getOperando2().startsWith("-")){
                         tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
                     } else {
@@ -258,7 +252,7 @@ public class GeneradorCodigo {
 
     private static void generarCodigoLlamadoFuncion(Terceto t){
         if (!t.getOperando2().startsWith("[")){ // en caso de ser un terceto, el operando ya esta en la pila
-            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
+            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".") || t.getOperando2().startsWith("-")){
                 String tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
             } else {
@@ -271,7 +265,7 @@ public class GeneradorCodigo {
     
     private static void generarCodigoReturn(Terceto t){
         if (!t.getOperando1().startsWith("[")){ // en caso de ser un terceto, el ooperando ya esta en la pila
-            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
+            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".") || t.getOperando1().startsWith("-")){
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
@@ -286,34 +280,28 @@ public class GeneradorCodigo {
     private static void generarCodigoOperacionAritmetica(String operador, Terceto t ){
         String tipo = (t.getTipo().equals("INT"))?"i32":"f32";
         String tipo1,tipo2; // Redundante, ya se chequea durante la generacion de tercetos
-        // String op1 = "";
+
+
+        boolean prod = false;
+        if(operador.equals("mul") || operador.equals("div"))
+            prod = true;
 
         if (!t.getOperando1().startsWith("[")){
-            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
+            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".") || t.getOperando1().startsWith("-")){
                 tipo1 = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
-                // if(!operador.equals("div"))
                     mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
-                // if(operador.equals("div"))
-                //     op1 = op1.concat("\t".repeat(tabs) + tipo1 + ".const " + t.getOperando1() + "\n");
-                
             } else {
-                // if(!operador.equals("div"))
                     mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
-                // if(operador.equals("div"))
-                //     op1 = op1.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
             }
         } else {
-            // if(!operador.equals("div"))
-                checkAux(t.getOperando1());
-            // if(operador.equals("div"))
-            //     op1 = op1.concat("\t".repeat(tabs) + "local.get $" + "aux.".concat(t.getOperando1().replace("[", "").replace("]", "") + "\n"));
+            checkAux(t.getOperando1());
         }
 
         if(operador.equals("div"))
             generarVariableAuxiliar(tipo, "op1." + tipo);
         
         if (!t.getOperando2().startsWith("[")){
-            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
+            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".") || t.getOperando2().startsWith("-")){
                 tipo2 = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo2 + ".const " + t.getOperando2() + "\n");
             } else {
@@ -331,10 +319,39 @@ public class GeneradorCodigo {
             operador = operador + "_s";
         
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + "." + operador + "\n");
+
+        if(prod && tipo.equals("i32"))
+            checkOverflowProducto();
+    }
+
+    public static void checkOverflowProducto(){
+        mainWatAux = mainWatAux.concat("\t\t" + ";; Chequeo de overflow\n");
+        generarVariableAuxiliar("i32", "prod");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+        tabs++;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
+        tabs++;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $aux.prod\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const -32768\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.ge_s\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $error_prod_overflow\n");
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $aux.prod\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const 32767\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.le_s\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $error_prod_overflow\n");
+        tabs--;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "local.get $aux.prod\n");
     }
 
     public static void generarCodigoComprobacionDivCero(String tipo, String op1){
+
         String nombreVarAuxiliar = tipo.equals("i32")?"div.i32":"div.f32";
+        mainWatAux = mainWatAux.concat("\t\t" + ";; Chequeo de division por cero\n");
         generarVariableAuxiliar(tipo,nombreVarAuxiliar); // guardo del divisor
 
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
@@ -359,7 +376,7 @@ public class GeneradorCodigo {
 
     public static void generarCodigoConversion(Terceto t, String numeroTerceto){
         if (!t.getOperando1().startsWith("[")){
-            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
+            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".") || t.getOperando1().startsWith("-")){
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
@@ -390,7 +407,7 @@ public class GeneradorCodigo {
         // String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
         
         if (!t.getOperando1().startsWith("[")){
-            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
+            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".") || t.getOperando1().startsWith("-")){
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
@@ -402,7 +419,7 @@ public class GeneradorCodigo {
         }
         
         if (!t.getOperando2().startsWith("[")){
-            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
+            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".") || t.getOperando2().startsWith("-")){
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
             } else {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
@@ -455,12 +472,10 @@ public class GeneradorCodigo {
     
     public static void generarCodigoOperacionLogica(String op, Terceto t, String numeroTerceto){
         String tipo;
-        // Va a generar problemas cuando tenga como operador a una constante, variable o expresion de tipo SINGLE
-        // No asi con los tercetos de comparaciones u operaciones logicas ya que se almacenan 
-        // en variables auxiliares de tipo i32
+
         if (!t.getOperando1().startsWith("[")){
             tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
-            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".")){
+            if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".") || t.getOperando1().startsWith("-")){
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando1() + "\n");
             } else {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando1()) + ".get $" + t.getOperando1() + "\n");
@@ -471,7 +486,7 @@ public class GeneradorCodigo {
         
         if (!t.getOperando2().startsWith("[")){
             tipo = (tablaSimbolos.get(t.getOperando2()).get("TIPO").equals("INT"))?"i32":"f32";
-            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")){
+            if (Character.isDigit(t.getOperando2().charAt(0)) || t.getOperando2().startsWith(".")|| t.getOperando2().startsWith("-")){
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + tipo + ".const " + t.getOperando2() + "\n");
             } else {
                 mainWatAux = mainWatAux.concat("\t".repeat(tabs) + getModoObjeto(t.getOperando2()) + ".get $" + t.getOperando2() + "\n");
@@ -562,9 +577,8 @@ public class GeneradorCodigo {
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");
     }
 
-    public static void generarVariableAuxiliar(String tipo, String terceto){
-        // String nombreAux = "aux.".concat("[" + contador + "]").replace("[", "").replace("]", "");
-        String nombreAux = "aux.".concat(terceto).replace("[", "").replace("]", "");
+    public static void generarVariableAuxiliar(String tipo, String nombre){
+        String nombreAux = "aux.".concat(nombre).replace("[", "").replace("]", "");
         if(!variablesAuxiliares.contains(nombreAux)){
             variablesAuxiliares.add(nombreAux);
             mainWat = mainWat.concat("\t".repeat(2) + "(local $" + nombreAux + " " + tipo + ")\n");
@@ -616,6 +630,14 @@ public class GeneradorCodigo {
         .concat("          },\n")
         .concat("          \"incumplimiento_pre\": () => {\n")
         .concat("              throw new WebAssembly.RuntimeError(\"Incumplimiento de precondicion\");\n")
+        .concat("          },\n")
+        .concat("          \"error_prod_overflow\": () => {\n")
+        .concat("              document.writeln(\"Error - Overflow en la operacion<br>\");\n")
+        .concat("              throw new WebAssembly.RuntimeError(\"Error - Overflow en la operacion\");\n")
+        .concat("          },\n")
+        .concat("          \"error_recursion_mutua\": () => {\n")
+        .concat("              document.writeln(\"Error - La recursion mutua no esta permitida<br>\");\n")
+        .concat("              throw new WebAssembly.RuntimeError(\"Error - Recursion mutua\");\n")
         .concat("          },\n")
         );
         

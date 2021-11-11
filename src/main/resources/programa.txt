@@ -1,27 +1,25 @@
 Mi_programa_hello;
 
-//SINGLE a_2, _abc, b_1;//
+INT a, b;
+INT FUNC (INT) varf1, varf2;
 
-//FLOAT FUNC errores_lexicos (INT props)//
-
-INT a, b, c, d, e, f;
-SINGLE z;
+INT FUNC myFunc(INT g)
+BEGIN
+    PRE: (g <= 3), %Error - soy mayor a 3%;
+    RETURN(g);
+END;
 
 BEGIN
-    //a := 32768;//
-    PRINT(%Fuera del loop%);
-    REPEAT(a := 0; a < 4 + 1 * 20 - 1; 1)
-    BEGIN
-        PRINT(%Dentro del loop%);
-    END
+    //a := myFunc(2);
+    varf1 := myFunc;
+    a := 1;//
+    //a := var1(2);
+    a := var1(2) + 1;
+    a := 1 + var1(2) + 1;//
 
-    //a := 1;
-    a := 1 + 2;
-    z := SINGLE(2);
-    z := SINGLE(1) + SINGLE(2);
-    z := SINGLE(1) + 2.0;
-    z := SINGLE(1 + 2) + 2.0;
-    z := SINGLE(1 + 2) + SINGLE(3 + 4 - 1) - 2.0;//
 
+    IF (varf1(2) + 1 <> 2) THEN
+        PRINT(%hola%);
+    ENDIF;
 
 END

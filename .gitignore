@@ -9,7 +9,7 @@
 .factorypath
 
 wat2wasm
-yacc.*
+yacc.*
 yacc.exe
 y.output
 Parser.java
