@@ -694,14 +694,18 @@ public class GeneradorCodigo {
         .concat("          \"error_recursion_mutua\": () => {\n")
         .concat("              document.writeln(\"Error - La recursion mutua no esta permitida<br>\");\n")
         .concat("              throw new WebAssembly.RuntimeError(\"Error - Recursion mutua\");\n")
-        .concat("          },\n")
+        .concat("          }")
         // .concat("          \"tbl\": new WebAssembly.Table({initial:" + cantidadFunciones + ", element:\"funcref\"}),\n")
         );
         
-        for(String i: js.subList(0, js.size() - 1)){
-            mainJs = mainJs.concat("          " + i + ",\n");
+        if(js.size() > 0){
+            mainJs = mainJs.concat(",\n");
+            for(String i: js.subList(0, js.size() - 1)){
+                mainJs = mainJs.concat("          " + i + ",\n");
+            }
+            mainJs = mainJs.concat("          " + js.get(js.size() - 1) + "\n");
         }
-        mainJs = mainJs.concat("          " + js.get(js.size() - 1) + "\n");
+        mainJs = mainJs.concat("\n");
         mainJs = mainJs.concat("       }\n");
         mainJs = mainJs.concat("  };\n");
         mainJs = mainJs.concat(""
