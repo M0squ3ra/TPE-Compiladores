@@ -16,9 +16,12 @@ BEGIN
     //a := var1(2);
     a := var1(2) + 1;
     a := 1 + var1(2) + 1;//
+    varf1 := myFunc;
+    a := myFunc(2);
+    a := varf1(2);
 
 
-    IF (varf1(2) + 1 <> 2) THEN
+    IF (2 + 1 <> 2) THEN
         PRINT(%hola%);
     ENDIF;
 

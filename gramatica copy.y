@@ -47,13 +47,7 @@ SENTENCIA_DECLARATIVA:          SENTENCIA_DECLARATIVA DECLARACION_VARIABLES
 
 ASIGNACION_FUNC_VAR:            TIPO FUNC '(' TIPO ')' VARIABLES_FUNC_VAR ';' {
                                     addEstructura("Declaracion de variables de funciones");
-                                    Map<String, Object> atributos;
-                                    for(String lexema: variables){
-                                        atributos = lexico.getAtributosLexema(lexema);
-                                        atributos.put("TIPO", $1.sval);
-                                        atributos.put("TIPO_PARAMETRO", $4.sval);
-                                    }
-                                    variables.clear();
+                                    addTipoVariables();
                                     }
                                 | ASIGNACION_FUNC_VAR_ERROR
                                 ;
@@ -167,35 +161,24 @@ SENTENCIA_EJECUTABLE:           IDENTIFICADOR ASIGNACION EXPRESION ';' {
                                         addTerceto(new Terceto(":=", $1.sval, $3.sval, "Error - no declarada"));
                                     } 
                                     else{
-                                        if($3.sval != null){
-                                            if(!$3.sval.startsWith("[")){
-                                                if(Character.isDigit($3.sval.charAt(0)) || $3.sval.startsWith(".") || $3.sval.startsWith("-")){
-                                                    if(checkTipos(id,$3.sval))
-                                                        addTerceto(new Terceto(":=", id, $3.sval, getTipo(id)));
-                                                } else{
-                                                    Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
-                                                    if(!tablaSimbolos.get($3.sval).get("USO").equals("ID_VAR_FUNC") && !tablaSimbolos.get($3.sval).get("USO").equals("ID_FUNC")){
-                                                        if(checkTipos(id,$3.sval))
-                                                            addTerceto(new Terceto(":=", id, $3.sval, getTipo(id)));
-                                                        else 
-                                                            addTerceto(new Terceto(":=", id, $3.sval, "Error de tipo"));
-                                                    } else{
-                                                        if(tablaSimbolos.get(id).get("USO").equals("ID_VAR_FUNC"))
-                                                            addTerceto(new Terceto("ASIG_FUNC",id,$3.sval));
-                                                        else
-                                                            yyerrorSemantico("Error de asignacion, no se puede asignar una funcion a la variable del lado izquierdo");
-                                                    }
-                                                }
-                                            }else{
-                                                if(!errorAsignacion){
-                                                    if(checkTipos(id,$3.sval))
-                                                        addTerceto(new Terceto(":=", id, $3.sval, getTipo(id)));
-                                                    else 
-                                                        addTerceto(new Terceto(":=", id, $3.sval, "Error de tipo"));
-                                                } else{
-                                                    errorAsignacion = false;
-                                                }
+                                        if(!$3.sval.startsWith("[")){
+                                            Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
+                                            if(!tablaSimbolos.get($3.sval).get("USO").equals("ID_VAR_FUNC") && !tablaSimbolos.get($3.sval).get("USO").equals("ID_FUNC")){
+                                                if(checkTipos(id,$3.sval))
+                                                    addTerceto(new Terceto(":=", id, $3.sval, getTipo(id)));
+                                                else 
+                                                    addTerceto(new Terceto(":=", id, $3.sval, "Error de tipo"));
+                                            } else{
+                                                if(tablaSimbolos.get(id).get("USO").equals("ID_VAR_FUNC"))
+                                                    addTerceto(new Terceto("ASIG_FUNC",id,$3.sval));
+                                                else
+                                                    yyerrorSemantico("Error de asignacion, no se puede asignar una funcion a la variable del lado izquierdo");
                                             }
+                                        }else{
+                                            if(checkTipos(id,$3.sval))
+                                                addTerceto(new Terceto(":=", id, $3.sval, getTipo(id)));
+                                            else 
+                                                addTerceto(new Terceto(":=", id, $3.sval, "Error de tipo"));
                                         }
                                     }
                                         
@@ -310,43 +293,24 @@ CONVERSION:                     SINGLE '(' EXPRESION ')' { addTerceto(new Tercet
                                 ;
 
 EXPRESION:                      EXPRESION '+' TERMINO { 
-                                    if(checkUso($1.sval,$3.sval)){
-                                        addTercetoAritmetica("+",$1.sval,$3.sval);
-                                        $$ = getReferenciaUltimaInstruccion();
-                                    }
                                     /*addTerceto(new Terceto("+", $1.sval, $3.sval)); */
-                                    // addTercetoAritmetica("+",$1.sval,$3.sval);
-                                    // $$ = getReferenciaUltimaInstruccion(); }
-                                    }
+                                    addTercetoAritmetica("+",$1.sval,$3.sval);
+                                    $$ = getReferenciaUltimaInstruccion(); }
                                 | EXPRESION '-' TERMINO { 
-                                    if(checkUso($1.sval,$3.sval)){
-                                        addTercetoAritmetica("-",$1.sval,$3.sval);
-                                        $$ = getReferenciaUltimaInstruccion();
-                                    }
                                     /*addTerceto(new Terceto("-", $1.sval, $3.sval)); */
-                                    // addTercetoAritmetica("-",$1.sval,$3.sval);
-                                    // $$ = getReferenciaUltimaInstruccion(); }
-                                    }
+                                    addTercetoAritmetica("-",$1.sval,$3.sval);
+                                    $$ = getReferenciaUltimaInstruccion(); }
                                 | TERMINO { $$ = $1; }
                                 ;
 
 TERMINO:                        TERMINO '*' FACTOR { 
-                                    if(checkUso($1.sval,$3.sval)){
-                                        addTercetoAritmetica("*",$1.sval,$3.sval);
-                                        $$ = getReferenciaUltimaInstruccion();
-                                    }
-                                    // addTercetoAritmetica("*",$1.sval,$3.sval);
-                                    // $$ = getReferenciaUltimaInstruccion(); }
-                                    }
-                                    
+                                    /*addTerceto(new Terceto("*", $1.sval, $3.sval)); */
+                                    addTercetoAritmetica("*",$1.sval,$3.sval);
+                                    $$ = getReferenciaUltimaInstruccion(); }
                                 | TERMINO '/' FACTOR { 
-                                    if(checkUso($1.sval,$3.sval)){
-                                        addTercetoAritmetica("/",$1.sval,$3.sval);
-                                        $$ = getReferenciaUltimaInstruccion();
-                                    }
-                                    // addTercetoAritmetica("/",$1.sval,$3.sval);
-                                    // $$ = getReferenciaUltimaInstruccion();}
-                                }
+                                    /*addTerceto(new Terceto("/", $1.sval, $3.sval));*/
+                                    addTercetoAritmetica("/",$1.sval,$3.sval);
+                                    $$ = getReferenciaUltimaInstruccion();}
                                 | FACTOR {$$ = $1;}
                                 ;
                                 
@@ -363,29 +327,14 @@ FACTOR:                         IDENTIFICADOR { $$ = new ParserVal(getAmbitoIden
                                 ;
 
 LLAMADO_FUNCION:                IDENTIFICADOR '(' EXPRESION ')' {String id = getAmbitoIdentificador($1.sval);
-                                                                
-                                                                if (id != null) {
-                                                                    if(lexico.getAtributosLexema(id).get("USO").equals("ID_FUNC") || lexico.getAtributosLexema(id).get("USO").equals("ID_VAR_FUNC")){
-                                                                        if(lexico.getAtributosLexema(id).get("TIPO_PARAMETRO").equals(getTipo($3.sval))){
-                                                                            if(lexico.getAtributosLexema(id).get("USO").equals("ID_FUNC"))
-                                                                                addTerceto(new Terceto("CALL_FUNC", id, $3.sval,getTipo(id))); 
-                                                                            else
-                                                                                addTerceto(new Terceto("CALL_FUNC_VAR", id, $3.sval,getTipo(id))); 
-                                                                            $$ = getReferenciaUltimaInstruccion();
-                                                                        } else {
-                                                                            yyerrorSemantico("Tipo de la expresion incompatible con el parametro de la funcion");
-                                                                            $$ = getReferenciaUltimaInstruccion();
-                                                                        }
-                                                                    } else{
-                                                                        yyerrorSemantico("\"" + $1.sval + "\" es una variable, no una funcion");
-                                                                        $$ = new ParserVal(id);
-                                                                    }
+                                                                if(lexico.getAtributosLexema(id).get("TIPO_PARAMETRO").equals(getTipo($3.sval))){
+                                                                    addTerceto(new Terceto("CALL_FUNC", id, $3.sval,getTipo(id))); 
+                                                                    $$ = getReferenciaUltimaInstruccion();
                                                                 } else {
-                                                                    yyerrorSemantico("Funcion no declarada");
+                                                                    yyerrorSemantico("Tipo de la expresion incompatible con el parametro de la funcion");
                                                                     $$ = new ParserVal(id);
                                                                 }
-                                                        }
-
+                                                                }
                                 ;
 
 OPERADOR_COMPARADOR:            '>' {$$ = new ParserVal(">");}
@@ -417,7 +366,6 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     private boolean err = false;
     private List<String> variablesFunciones = new ArrayList<String>();
     private List<String> cadenas = new ArrayList<String>();
-    private boolean errorAsignacion = false;
 
     
 
@@ -574,7 +522,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
             yyerrorSemantico("Identificador ya utilizado en el ámbito.");
         } else {
             identificador = setAmbitoIdentificador(identificador);
-            if (uso.equals("ID_VARIABLE") || uso.equals("ID_VAR_FUNC")){
+            if (uso.equals("ID_VARIABLE")){
                 variables.add(identificador);
                 String funcion = getIdentificadorFuncionActual();
                 // if(variablesFunciones.get(funcion) == null)
@@ -591,8 +539,6 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     }
 
     public String getTipo(String o){
-        if(o == null)
-            return "Error";
         if(!o.startsWith("[")){
             Lexico lexico = Lexico.getInstance();
             return (String) lexico.getAtributosLexema(o).get("TIPO");
@@ -610,6 +556,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
     // Como la conversion es explicita no es necesario armar una tabla de tipos
     public boolean checkTipos(String o1, String o2){
+        System.out.println(o2 + " " + getTipo(o2));
         if(!getTipo(o1).equals(getTipo(o2))){
             yyerrorSemantico("Tipos incompatibles");
             return false;
@@ -681,32 +628,5 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
         checkTipos(expresion, funcion);
     }
-
-    public boolean checkUso(String o1, String o2){
-        if(o1 == null || o2 == null)
-            return false;
-        if((o2.startsWith("[") || Character.isDigit(o2.charAt(0)) || o2.startsWith(".") || o2.startsWith("-")) && (o1.startsWith("[") || Character.isDigit(o1.charAt(0)) || o1.startsWith(".") || o1.startsWith("-"))){
-            return true;
-        } else{
-            Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos(); 
-            if(o1.startsWith("[") || Character.isDigit(o1.charAt(0)) || o1.startsWith(".") || o1.startsWith("-")){
-                if(tablaSimbolos.get(o2).get("USO").equals("ID_VAR_FUNC") || tablaSimbolos.get(o2).get("USO").equals("ID_FUNC")){
-                    yyerrorSemantico("No se puede operar con funciones");
-                    errorAsignacion = true;
-                    return false;
-                }
-            } else if(o2.startsWith("[") || Character.isDigit(o2.charAt(0)) || o2.startsWith(".") || o2.startsWith("-")){
-                if(tablaSimbolos.get(o1).get("USO").equals("ID_VAR_FUNC") || tablaSimbolos.get(o1).get("USO").equals("ID_FUNC")){
-                    yyerrorSemantico("No se puede operar con funciones");
-                    errorAsignacion = true;
-                    return false;
-                }
-            } else {
-                yyerrorSemantico("No se puede operar con funciones");
-                errorAsignacion = true;
-                return false;
-            }
-        }
-        return true;
-    }
+    
 }

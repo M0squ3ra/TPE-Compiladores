@@ -397,7 +397,7 @@ public class GeneradorCodigo {
         }
 
         if (t.getOperando1().startsWith("[")){
-            rearmarCadenaTercetos(t.getOperando2());
+            rearmarCadenaTercetos(t.getOperando1());
             generarVariableAuxiliar(tipo, t.getOperando1());
         }
         if (t.getOperando2().startsWith("[")){

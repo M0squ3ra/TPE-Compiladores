@@ -549,7 +549,7 @@ final static String yyrule[] = {
 "TIPO : INT",
 };
 
-//#line 402 "gramatica.y"
+//#line 405 "gramatica.y"
 
     private Lexico lexico = Lexico.getInstance();
     private List<Error> erroresSintacticos = new ArrayList<Error>(); 
@@ -1435,7 +1435,10 @@ case 95:
                                                                 if (id != null) {
                                                                     if(lexico.getAtributosLexema(id).get("USO").equals("ID_FUNC") || lexico.getAtributosLexema(id).get("USO").equals("ID_VAR_FUNC")){
                                                                         if(lexico.getAtributosLexema(id).get("TIPO_PARAMETRO").equals(getTipo(val_peek(1).sval))){
-                                                                            addTerceto(new Terceto("CALL_FUNC", id, val_peek(1).sval,getTipo(id))); 
+                                                                            if(lexico.getAtributosLexema(id).get("USO").equals("ID_FUNC"))
+                                                                                addTerceto(new Terceto("CALL_FUNC", id, val_peek(1).sval,getTipo(id))); 
+                                                                            else
+                                                                                addTerceto(new Terceto("CALL_FUNC_VAR", id, val_peek(1).sval,getTipo(id))); 
                                                                             yyval = getReferenciaUltimaInstruccion();
                                                                         } else {
                                                                             yyerrorSemantico("Tipo de la expresion incompatible con el parametro de la funcion");
@@ -1452,38 +1455,38 @@ case 95:
                                                         }
 break;
 case 96:
-//#line 388 "gramatica.y"
+//#line 391 "gramatica.y"
 {yyval = new ParserVal(">");}
 break;
 case 97:
-//#line 389 "gramatica.y"
+//#line 392 "gramatica.y"
 {yyval = new ParserVal("<");}
 break;
 case 98:
-//#line 390 "gramatica.y"
+//#line 393 "gramatica.y"
 {yyval = new ParserVal(">=");}
 break;
 case 99:
-//#line 391 "gramatica.y"
+//#line 394 "gramatica.y"
 {yyval = new ParserVal("<=");}
 break;
 case 100:
-//#line 392 "gramatica.y"
+//#line 395 "gramatica.y"
 {yyval = new ParserVal("==");}
 break;
 case 101:
-//#line 393 "gramatica.y"
+//#line 396 "gramatica.y"
 { yyval = new ParserVal("<>"); }
 break;
 case 102:
-//#line 396 "gramatica.y"
+//#line 399 "gramatica.y"
 {tipo = "SINGLE"; yyval = new ParserVal("SINGLE");}
 break;
 case 103:
-//#line 397 "gramatica.y"
+//#line 400 "gramatica.y"
 {tipo = "INT";  yyval = new ParserVal("INT");}
 break;
-//#line 1412 "Parser.java"
+//#line 1415 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
