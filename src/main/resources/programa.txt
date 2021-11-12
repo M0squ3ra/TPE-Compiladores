@@ -1,6 +1,7 @@
 Mi_programa_hello;
 
 INT b;
+INT FUNC (INT) varf1;
 
 INT FUNC A(INT g)
 INT a;
@@ -20,7 +21,7 @@ END;
 
 
 BEGIN
-
+    varf1 := A;
     PRINT(%Hola mundo%);
     b := A(2);
     PRINT(%HOLA mundo despues de rec%);

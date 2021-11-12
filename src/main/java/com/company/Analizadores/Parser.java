@@ -566,7 +566,7 @@ final static String yyrule[] = {
     private List<String> variablesFunciones = new ArrayList<String>();
     private List<String> cadenas = new ArrayList<String>();
     private boolean errorAsignacion = false;
-    private List<List<Object>> checkDeclaracionFunciones = new ArrayList<List<Object>>();
+    private List<String> checkDeclaracionFunciones = new ArrayList<String>();
 
 
     
@@ -605,10 +605,6 @@ final static String yyrule[] = {
 
     public String getNombrePrograma(){
         return nombrePrograma;
-    }
-
-    public List<List<Object>> getCheckDeclaracionFunciones(){
-        return checkDeclaracionFunciones;
     }
 
     public void addCadena(String cadena){
@@ -726,8 +722,16 @@ final static String yyrule[] = {
 
     public void verificarRedeclaracion(String identificador, String uso) {
         if (getAmbitoIdentificador(identificador) != null) {
-            if(!lexico.getInstance().getAtributosLexema(getAmbitoIdentificador(identificador)).get("USO").equals("ID_FUNC"))
+            // Cambiar, no va a detectar redeclaracion de funciones
+            // Provisorio para detectar las funciones en la segunda pasada
+            if(!lexico.getInstance().getAtributosLexema(getAmbitoIdentificador(identificador)).get("USO").equals("ID_FUNC")){
                 yyerrorSemantico("Identificador ya utilizado en el ámbito.");
+            } else {
+                if(checkDeclaracionFunciones.contains(getAmbitoIdentificador(identificador)))
+                    yyerrorSemantico("Identificador ya utilizado en el ámbito.");
+                else
+                    checkDeclaracionFunciones.add(getAmbitoIdentificador(identificador));
+            }
         } else {
             identificador = setAmbitoIdentificador(identificador);
             if (uso.equals("ID_VARIABLE") || uso.equals("ID_VAR_FUNC")){
@@ -866,7 +870,7 @@ final static String yyrule[] = {
         return true;
     }
 
-//#line 800 "Parser.java"
+//#line 804 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1494,7 +1498,7 @@ case 103:
 //#line 400 "gramatica.y"
 {tipo = "INT";  yyval = new ParserVal("INT");}
 break;
-//#line 1423 "Parser.java"
+//#line 1427 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

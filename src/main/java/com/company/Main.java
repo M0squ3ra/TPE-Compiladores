@@ -57,9 +57,6 @@ public class Main {
         for(Error e: parser.getErroresSintacticos())
             System.out.println(e.toString());
 
-        for(List l: parser.getCheckDeclaracionFunciones())
-            System.out.println(l);
-
         System.out.println("\n Errores Semanticos");
         System.out.println("*-------------------*");
         for(Error e: parser.getErroresSemanticos())
