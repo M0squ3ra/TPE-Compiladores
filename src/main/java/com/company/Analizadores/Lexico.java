@@ -34,6 +34,24 @@ public class Lexico {
     private static List<Error> errores;
     private static boolean fin = false;
     
+    public static void reset(List<Character> data){
+        Lexico.data = data;
+        Lexico.linea = 1;
+        Lexico.buffer = "";
+        Lexico.errores = new ArrayList<Error>();
+        Lexico.fin = false;
+        // Dejo las entradas de funciones para poder utilizarlas en la segunda pasada del parser
+        List<String> keys = new ArrayList<String>(Lexico.tablaSimbolos.keySet());
+        for(String k: keys){
+            if(Lexico.tablaSimbolos.get(k).get("USO") != null){
+                if(!Lexico.tablaSimbolos.get(k).get("USO").equals("ID_FUNC"))
+                Lexico.tablaSimbolos.remove(k);
+            } else{
+                Lexico.tablaSimbolos.remove(k);
+            }
+        }
+
+    }
     
     public static Lexico getInstance(){
         if(Lexico.lexico == null)

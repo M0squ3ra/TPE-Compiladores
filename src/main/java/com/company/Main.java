@@ -19,10 +19,18 @@ public class Main {
     public static void main(String[] args) throws IOException{
 
         Lexico lexico = Lexico.getInstance();
-        lexico.setData(Main.leerArchivo("src/main/resources/programa.txt"));
-        // lexico.setData(Main.leerArchivo(args[0]));
+        // String rutaArchivo = args[0];
+        String rutaArchivo = "src/main/resources/programa.txt";
+        lexico.setData(Main.leerArchivo(rutaArchivo));
         
-        Parser parser = new Parser(false);
+        Parser parser = null;
+        parser = new Parser(false);
+		parser.yyparse();
+
+
+        Lexico.reset(Main.leerArchivo(rutaArchivo));
+        parser = new Parser(false);
+
 		parser.yyparse();
 
         // System.out.println("\n Estructuras detectadas, el numero de linea indica el final de la estructura");
@@ -49,20 +57,24 @@ public class Main {
         for(Error e: parser.getErroresSintacticos())
             System.out.println(e.toString());
 
+        for(List l: parser.getCheckDeclaracionFunciones())
+            System.out.println(l);
+
         System.out.println("\n Errores Semanticos");
         System.out.println("*-------------------*");
         for(Error e: parser.getErroresSemanticos())
             System.out.println(e.toString());
 
-        // System.out.println("\n Contenido de la tabla de simbolos");
-        // System.out.println("*---------------------------------*");
+
+        System.out.println("\n Contenido de la tabla de simbolos");
+        System.out.println("*---------------------------------*");
         Map<String, Map<String, Object>> tablaSimbolos = lexico.getTablaSimbolos();
-        // for(String i: tablaSimbolos.keySet()){
-        //     System.out.println("[" + i + "]:");
-        //     Map<String, Object> atributos = tablaSimbolos.get(i);
-        //     for(String j: atributos.keySet())
-        //         System.out.println("    " + j + ": " + atributos.get(j));
-        // }
+        for(String i: tablaSimbolos.keySet()){
+            System.out.println("[" + i + "]:");
+            Map<String, Object> atributos = tablaSimbolos.get(i);
+            for(String j: atributos.keySet())
+                System.out.println("    " + j + ": " + atributos.get(j));
+        }
 
         if(!parser.getError()){
             System.out.println("\n Tercetos - [Nro.Terceto][Tipo](Terceto)");

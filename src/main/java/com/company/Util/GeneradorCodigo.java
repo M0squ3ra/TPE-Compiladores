@@ -94,11 +94,30 @@ public class GeneradorCodigo {
             String parametro = (String)(tablaSimbolos.get(nombreFuncion).get("NOMBRE_PARAMETRO"));
             String tipoParametro = (tablaSimbolos.get(nombreFuncion).get("TIPO_PARAMETRO").equals("INT"))?"i32":"f32";
             mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (param $" + parametro + " " + tipoParametro + ") (result " + tipoRetorno + ")\n");           
+            tabs++;
+            mainWat = mainWat.concat("\t;; Chequeo de recursion mutua\n");
+            mainWat = mainWat.concat("\t".repeat(tabs) + "(block\n"); 
+            tabs++;        
+            mainWat = mainWat.concat("\t".repeat(tabs) + "call $pop\n"); 
+            mainWat = mainWat.concat("\t".repeat(tabs) + "global.set $global.aux.stack\n"); 
+            mainWat = mainWat.concat("\t".repeat(tabs) + "call $top\n"); 
+            mainWat = mainWat.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
+            mainWat = mainWat.concat("\t".repeat(tabs) + "i32.eq\n");     
+            mainWat = mainWat.concat("\t".repeat(tabs) + "br_if 0\n");     
+            mainWat = mainWat.concat("\t".repeat(tabs) + "call $error_recursion_mutua\n");     
+            tabs--;
+            mainWat = mainWat.concat("\t".repeat(tabs) + ")\n");    
+            mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $global.aux.stack\n"); 
+            mainWat = mainWat.concat("\t".repeat(tabs) + "call $push\n"); 
         } else{
-            mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (export \"" + nombreFuncion + "\")\n"); // tiene que devolver algo si o si           
+            mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (export \"" + nombreFuncion + "\")\n");        
         }
+        
 
-        tabs++;        
+        mainWat = mainWat.concat("\t".repeat(tabs) + ";; Cargo en la pila la referencia a la funcion actual\n");
+        mainWat = mainWat.concat("\t".repeat(tabs + 1) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
+        mainWat = mainWat.concat("\t".repeat(tabs + 1) + "call $push\n"); 
+
         contador = 0;
         variablesAuxiliares.clear();
         mainWatAux = "";
@@ -109,9 +128,12 @@ public class GeneradorCodigo {
             }
             contador++;
         }
+
         mainWat = mainWat.concat(mainWatAux);
-        if (nombreFuncion.equals(identificadorMain))
-            mainWat = mainWat.concat("\t".repeat(tabs-1) + ")\n"); 
+        mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n");
+        
+        // if (nombreFuncion.equals(identificadorMain))
+        //     mainWat = mainWat.concat("\t".repeat(tabs-1) + ")\n"); 
         
         tabs--;
     }
@@ -225,16 +247,21 @@ public class GeneradorCodigo {
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"incumplimiento_pre\" (func $incumplimiento_pre))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_prod_overflow\" (func $error_prod_overflow))\n");
         mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"error_recursion_mutua\" (func $error_recursion_mutua))\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"push\" (func $push (param i32)))\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"pop\" (func $pop (result i32)))\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(import \"js\" \"top\" (func $top (result i32)))\n");
                 
         mainWat = mainWat.concat("\n;;  Declaracion de variables globales\n");
         mainWat = mainWat.concat(";; ----------------------------------------\n");
+        mainWat = mainWat.concat("\t".repeat(tabs) + "(global $global.aux.stack (import \"js\" \"global.aux.stack\") (mut i32))\n");
+        js.add("\"global.aux.stack\": new WebAssembly.Global({value:\'i32\', mutable:true}, 0)");
         for(String v: variablesFuncion){
             if(!tablaSimbolos.get(v).get("USO").equals("ID_VAR_FUNC")){
                 String tipo = (tablaSimbolos.get(v).get("TIPO").equals("INT"))?"i32":"f32";
-                mainWat = mainWat.concat("\t".repeat(tabs) + "(global $" + v + " (import \"js\" \"global." + v + "\") " + "(mut " + tipo + "))\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + "(global $" + v + " (import \"js\" \"global." + v + "\") (mut " + tipo + "))\n");
                 js.add("\"global." + v + "\": new WebAssembly.Global({value:\'"+tipo+"\', mutable:true}, 0)");
             } else{
-                mainWat = mainWat.concat("\t".repeat(tabs) + "(global $" + v + " (import \"js\" \"global." + v + "\") " + "(mut i32))\n");
+                mainWat = mainWat.concat("\t".repeat(tabs) + "(global $" + v + " (import \"js\" \"global." + v + "\") (mut i32))\n");
                 js.add("\"global." + v + "\": new WebAssembly.Global({value:\'i32\', mutable:true}, 0)");
             }
         }
@@ -319,6 +346,11 @@ public class GeneradorCodigo {
     }
 
     private static void generarCodigoReturn(Terceto t){
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ";; Desapilo referencia a la funcion\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $pop\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "global.set $global.aux.stack\n"); // lo descarto en esta variable
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ";; Return\n");
+        
         if (!t.getOperando1().startsWith("[")){ // en caso de ser un terceto, el ooperando ya esta en la pila
             if (Character.isDigit(t.getOperando1().charAt(0)) || t.getOperando1().startsWith(".") || t.getOperando1().startsWith("-")){
                 String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
@@ -330,7 +362,7 @@ public class GeneradorCodigo {
             // checkAux(t.getOperando1());
             rearmarCadenaTercetos(t.getOperando1());
         }
-        mainWatAux = mainWatAux.concat("\t".repeat(tabs-1) + "  )\n");
+
     }
     
     private static void generarCodigoOperacionAritmetica(String operador, Terceto t ){
@@ -673,6 +705,7 @@ public class GeneradorCodigo {
     
     public static void generarJs(String identificadorMain){
         mainJs = mainJs.concat(""
+        .concat("let stack = [];")
         .concat("let import_object = {\n")
         .concat("    \"js\":{\n")
         .concat("          \"mem\": new WebAssembly.Memory({initial: 1}),\n")
@@ -694,8 +727,17 @@ public class GeneradorCodigo {
         .concat("          \"error_recursion_mutua\": () => {\n")
         .concat("              document.writeln(\"Error - La recursion mutua no esta permitida<br>\");\n")
         .concat("              throw new WebAssembly.RuntimeError(\"Error - Recursion mutua\");\n")
+        .concat("          },\n")
+        .concat("          \"push\": (value) => {\n")
+        .concat("              stack.push(value);\n")
+        .concat("          },\n")
+        .concat("          \"pop\": () => {\n")
+        .concat("              return stack.pop();\n")
+        .concat("          },\n")
+        .concat("          \"top\": () => {\n")
+        .concat("              return stack[stack.length - 1];\n")
         .concat("          }")
-        // .concat("          \"tbl\": new WebAssembly.Table({initial:" + cantidadFunciones + ", element:\"funcref\"}),\n")
+
         );
         
         if(js.size() > 0){

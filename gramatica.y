@@ -418,6 +418,8 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
     private List<String> variablesFunciones = new ArrayList<String>();
     private List<String> cadenas = new ArrayList<String>();
     private boolean errorAsignacion = false;
+    private List<List<Object>> checkDeclaracionFunciones = new ArrayList<List<Object>>();
+
 
     
 
@@ -444,6 +446,7 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
         return token;
     }
 
+
     public List<Integer> getTokensReconocidos(){
         return tokensReconocidos;
     }
@@ -454,6 +457,10 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
     public String getNombrePrograma(){
         return nombrePrograma;
+    }
+
+    public List<List<Object>> getCheckDeclaracionFunciones(){
+        return checkDeclaracionFunciones;
     }
 
     public void addCadena(String cadena){
@@ -571,7 +578,10 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
     public void verificarRedeclaracion(String identificador, String uso) {
         if (getAmbitoIdentificador(identificador) != null) {
-            yyerrorSemantico("Identificador ya utilizado en el ámbito.");
+            // Cambiar, no va a detectar redeclaracion de funciones
+            // Provisorio para detectar las funciones en la segunda pasada
+            if(!lexico.getInstance().getAtributosLexema(getAmbitoIdentificador(identificador)).get("USO").equals("ID_FUNC"))
+                yyerrorSemantico("Identificador ya utilizado en el ámbito.");
         } else {
             identificador = setAmbitoIdentificador(identificador);
             if (uso.equals("ID_VARIABLE") || uso.equals("ID_VAR_FUNC")){
