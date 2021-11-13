@@ -1,0 +1,27 @@
+Mi_programa;
+
+INT b;
+INT FUNC (INT) varf1;
+
+INT FUNC A(INT g)
+INT a;
+BEGIN
+    PRINT(%Funcion A%);
+    a := B(2);
+    RETURN(2 + 1 + g);
+END;
+
+INT FUNC B(INT g)
+INT a;
+BEGIN
+    PRINT(%Funcion B%);
+    a := A(2);
+    RETURN(2);
+END;
+
+
+BEGIN
+    PRINT(%Antes de llamar a la funcion%);
+    b := A(2);
+    PRINT(%Despues de llamar a la funcion%);
+END

@@ -1,0 +1,13 @@
+Mi_programa;
+
+INT a;
+
+BEGIN
+    REPEAT(a := 0; a < 5; 1)
+    BEGIN
+        PRINT(%Sentencia REPEAT%);
+    END
+
+    PRINT(%Fuera de la sentencia REPEAT%);
+
+END

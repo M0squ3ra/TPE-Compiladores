@@ -1,0 +1,34 @@
+Mi_programa;
+
+INT a;
+INT FUNC (INT) varf;
+
+INT FUNC A(INT g)
+BEGIN
+    PRINT(%Funcion A%);
+    RETURN(g);
+END;
+
+INT FUNC B(INT g)
+BEGIN
+    PRINT(%Funcion B%);
+    RETURN(g);
+END;
+
+
+BEGIN
+    a := 1;
+    IF(a == 1) THEN
+        varf := A;
+    ELSE
+        varf := B;
+    ENDIF;
+    
+    a := varf(2);
+    IF(a == 1) THEN
+        varf := A;
+    ELSE
+        varf := B;
+    ENDIF;
+    a := varf(2);
+END

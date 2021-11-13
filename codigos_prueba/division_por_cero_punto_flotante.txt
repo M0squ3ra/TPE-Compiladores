@@ -1,0 +1,9 @@
+Mi_programa;
+
+SINGLE a;
+
+BEGIN
+    PRINT(%Antes del error%);
+    a := 1.0 + 1.0 * SINGLE(2) / 0.0 + 2.0;
+    PRINT(%Despues del error%);
+END

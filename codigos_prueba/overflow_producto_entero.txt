@@ -1,0 +1,9 @@
+Mi_programa;
+
+INT a;
+
+BEGIN
+    PRINT(%Antes del error%);
+    a := -32768 / -1;
+    PRINT(%Despues del error%);
+END

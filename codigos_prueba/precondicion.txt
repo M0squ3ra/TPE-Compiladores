@@ -1,0 +1,15 @@
+Mi_programa;
+
+INT a;
+
+INT FUNC myFunc(INT g)
+BEGIN
+    PRE: (g < 2), %g no es menor a 2%;
+    PRINT(%g es menor a 2%);
+    RETURN(g);
+END;
+
+BEGIN
+    a := myFunc(1);
+    a := myFunc(2);
+END

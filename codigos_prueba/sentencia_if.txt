@@ -1,0 +1,37 @@
+Mi_programa;
+
+INT a;
+
+BEGIN
+    a := 2;
+    IF (a < 2 && a <> 1 || a >= 2) THEN
+        PRINT(%a es menor a 2 y distinto de 1, o a es mayor o igual a 2%);
+    ENDIF;
+
+    a := 1;
+    IF (a < 2 && a <> 1 || a >= 2) THEN
+        PRINT(%a es menor a 2 y distinto de 1, o a es mayor o igual a 2%);
+    ELSE 
+        PRINT(%a NO es menor a 2 y distinto de 1, y a NO es mayor o igual a 2%);
+    ENDIF;
+
+    // Lo mismo pero con bloques //
+
+    a := 2;
+    IF (a < 2 && a <> 1 || a >= 2) THEN
+    BEGIN
+        PRINT(%a es menor a 2 y distinto de 1, o a es mayor o igual a 2%);
+    END
+    ENDIF;
+
+    a := 1;
+    IF (a < 2 && a <> 1 || a >= 2) THEN
+    BEGIN
+        PRINT(%a es menor a 2 y distinto de 1, o a es mayor o igual a 2%);
+    END
+    ELSE 
+    BEGIN
+        PRINT(%a NO es menor a 2 y distinto de 1, y a NO es mayor o igual a 2%);
+    END
+    ENDIF;
+END
