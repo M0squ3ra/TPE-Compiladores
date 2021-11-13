@@ -15,7 +15,6 @@ y.output
 Parser.java
 ParserVal.java
 /wasm/*
-/codigos_prueba/*
 
 # Default ignored files
 /shelf/
