@@ -89,26 +89,27 @@ public class GeneradorCodigo {
     }
     
     public static void generarCodigoFuncion(List<Terceto> tercetos, String nombreFuncion, String identificadorMain){
+        mainWatAux = "";
         if (!nombreFuncion.equals(identificadorMain)){
             String tipoRetorno = (tablaSimbolos.get(nombreFuncion).get("TIPO").equals("INT"))?"i32":"f32";
             String parametro = (String)(tablaSimbolos.get(nombreFuncion).get("NOMBRE_PARAMETRO"));
             String tipoParametro = (tablaSimbolos.get(nombreFuncion).get("TIPO_PARAMETRO").equals("INT"))?"i32":"f32";
             mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (param $" + parametro + " " + tipoParametro + ") (result " + tipoRetorno + ")\n");           
             tabs++;
-            mainWat = mainWat.concat("\t;; Chequeo de recursion mutua\n");
-            mainWat = mainWat.concat("\t".repeat(tabs) + "(block\n"); 
+            mainWatAux = mainWatAux.concat("\t;; Chequeo de recursion mutua\n");
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n"); 
             tabs++;        
-            mainWat = mainWat.concat("\t".repeat(tabs) + "call $pop\n"); 
-            mainWat = mainWat.concat("\t".repeat(tabs) + "global.set $global.aux.stack\n"); 
-            mainWat = mainWat.concat("\t".repeat(tabs) + "call $top\n"); 
-            mainWat = mainWat.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
-            mainWat = mainWat.concat("\t".repeat(tabs) + "i32.eq\n");     
-            mainWat = mainWat.concat("\t".repeat(tabs) + "br_if 0\n");     
-            mainWat = mainWat.concat("\t".repeat(tabs) + "call $error_recursion_mutua\n");     
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $pop\n"); 
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "global.set $global.aux.stack\n"); 
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $top\n"); 
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.ne\n");     
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "br_if 0\n");     
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $error_recursion_mutua\n");     
             tabs--;
-            mainWat = mainWat.concat("\t".repeat(tabs) + ")\n");    
-            mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $global.aux.stack\n"); 
-            mainWat = mainWat.concat("\t".repeat(tabs) + "call $push\n"); 
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ")\n");    
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "global.get $global.aux.stack\n"); 
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $push\n"); 
             tabs--;
         } else{
             mainWat = mainWat.concat("\n" + "\t".repeat(tabs) + "(func $" + nombreFuncion + " (export \"" + nombreFuncion + "\")\n");        
@@ -118,7 +119,6 @@ public class GeneradorCodigo {
         
         contador = 0;
         variablesAuxiliares.clear();
-        mainWatAux = "";
         tabs++;
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ";; Cargo en la pila la referencia a la funcion actual\n");
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
@@ -132,7 +132,7 @@ public class GeneradorCodigo {
         }
 
         mainWat = mainWat.concat(mainWatAux);
-        mainWat = mainWat.concat("\t".repeat(tabs) +")\n");
+        mainWat = mainWat.concat("\t)\n");
         
         tabs--;
     }
@@ -705,7 +705,7 @@ public class GeneradorCodigo {
     
     public static void generarJs(String identificadorMain){
         mainJs = mainJs.concat(""
-        .concat("let stack = [];")
+        .concat("let stack = [-1];\n")
         .concat("let import_object = {\n")
         .concat("    \"js\":{\n")
         .concat("          \"mem\": new WebAssembly.Memory({initial: 1}),\n")
