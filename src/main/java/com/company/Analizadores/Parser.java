@@ -722,8 +722,6 @@ final static String yyrule[] = {
 
     public void verificarRedeclaracion(String identificador, String uso) {
         if (getAmbitoIdentificador(identificador) != null) {
-            // Cambiar, no va a detectar redeclaracion de funciones
-            // Provisorio para detectar las funciones en la segunda pasada
             if(!lexico.getInstance().getAtributosLexema(getAmbitoIdentificador(identificador)).get("USO").equals("ID_FUNC")){
                 yyerrorSemantico("Identificador ya utilizado en el ámbito.");
             } else {
@@ -870,7 +868,7 @@ final static String yyrule[] = {
         return true;
     }
 
-//#line 804 "Parser.java"
+//#line 802 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1276,12 +1274,12 @@ case 69:
 { 
                                         addEstructura("Sentencia REPEAT");
                                         Terceto bifurcacionFalse = backpatching.pop();
-                                        Terceto destinoBifurcacionIncondicional = backpatching.pop();
+                                        /* Terceto destinoBifurcacionIncondicional = backpatching.pop();*/
                                         String id = getAmbitoIdentificador(val_peek(10).sval);
                                         addTercetoAritmetica("+",id,val_peek(2).sval);
                                         addTerceto(new Terceto(":=", id, getReferenciaUltimaInstruccion().sval));
-                                        String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";
-                                        addTerceto(new Terceto("BI", referenciaBI));
+                                        /* String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";*/
+                                        /* addTerceto(new Terceto("BI", referenciaBI));*/
                                         String referenciaBF = "[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]";
                                         bifurcacionFalse.setOperando2(referenciaBF);
                                         addTerceto(new Terceto("END_REPEAT"));
@@ -1498,7 +1496,7 @@ case 103:
 //#line 400 "gramatica.y"
 {tipo = "INT";  yyval = new ParserVal("INT");}
 break;
-//#line 1427 "Parser.java"
+//#line 1425 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

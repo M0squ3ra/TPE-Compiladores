@@ -109,18 +109,20 @@ public class GeneradorCodigo {
             mainWat = mainWat.concat("\t".repeat(tabs) + ")\n");    
             mainWat = mainWat.concat("\t".repeat(tabs) + "global.get $global.aux.stack\n"); 
             mainWat = mainWat.concat("\t".repeat(tabs) + "call $push\n"); 
+            tabs--;
         } else{
-            mainWat = mainWat.concat("\n\t".repeat(tabs) + "(func $" + nombreFuncion + " (export \"" + nombreFuncion + "\")\n");        
+            mainWat = mainWat.concat("\n" + "\t".repeat(tabs) + "(func $" + nombreFuncion + " (export \"" + nombreFuncion + "\")\n");        
         }
         
 
-        mainWat = mainWat.concat("\t".repeat(tabs) + ";; Cargo en la pila la referencia a la funcion actual\n");
-        mainWat = mainWat.concat("\t".repeat(tabs + 1) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
-        mainWat = mainWat.concat("\t".repeat(tabs + 1) + "call $push\n"); 
-
+        
         contador = 0;
         variablesAuxiliares.clear();
         mainWatAux = "";
+        tabs++;
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + ";; Cargo en la pila la referencia a la funcion actual\n");
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(nombreFuncion) + "\n");     
+        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "call $push\n"); 
         for(Terceto t: tercetos){
             if(!operacionesExpresion.contains(t.getOperador())){
                 mainWatAux = mainWatAux.concat("\t" + ";; [" + contador + "] " + t.toString() + "\n");
@@ -130,10 +132,7 @@ public class GeneradorCodigo {
         }
 
         mainWat = mainWat.concat(mainWatAux);
-        mainWat = mainWat.concat("\t".repeat(tabs-1) + "  )\n");
-        
-        // if (nombreFuncion.equals(identificadorMain))
-        //     mainWat = mainWat.concat("\t".repeat(tabs-1) + ")\n"); 
+        mainWat = mainWat.concat("\t".repeat(tabs) +")\n");
         
         tabs--;
     }
@@ -596,6 +595,7 @@ public class GeneradorCodigo {
     public static void generarCodigoInicioRepeat(){
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "(block\n");
         tabs++;
+        flagRepeat = true;
     }
 
     public static void generarCodigoEndRepeat(Terceto t, String numeroTerceto){

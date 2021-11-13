@@ -249,12 +249,12 @@ SENTENCIA_REPEAT:               REPEAT '(' IDENTIFICADOR ASIGNACION CTE {
                                 ';' CTE ')' BLOQUE_SENTENCIA_REPEAT { 
                                         addEstructura("Sentencia REPEAT");
                                         Terceto bifurcacionFalse = backpatching.pop();
-                                        Terceto destinoBifurcacionIncondicional = backpatching.pop();
+                                        // Terceto destinoBifurcacionIncondicional = backpatching.pop();
                                         String id = getAmbitoIdentificador($3.sval);
                                         addTercetoAritmetica("+",id,$11.sval);
                                         addTerceto(new Terceto(":=", id, getReferenciaUltimaInstruccion().sval));
-                                        String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";
-                                        addTerceto(new Terceto("BI", referenciaBI));
+                                        // String referenciaBI = "[" + tercetos.get(getIdentificadorFuncionActual()).indexOf(destinoBifurcacionIncondicional) + "]";
+                                        // addTerceto(new Terceto("BI", referenciaBI));
                                         String referenciaBF = "[" + tercetos.get(getIdentificadorFuncionActual()).size() + "]";
                                         bifurcacionFalse.setOperando2(referenciaBF);
                                         addTerceto(new Terceto("END_REPEAT"));
@@ -574,8 +574,6 @@ TIPO:                           SINGLE {tipo = "SINGLE"; $$ = new ParserVal("SIN
 
     public void verificarRedeclaracion(String identificador, String uso) {
         if (getAmbitoIdentificador(identificador) != null) {
-            // Cambiar, no va a detectar redeclaracion de funciones
-            // Provisorio para detectar las funciones en la segunda pasada
             if(!lexico.getInstance().getAtributosLexema(getAmbitoIdentificador(identificador)).get("USO").equals("ID_FUNC")){
                 yyerrorSemantico("Identificador ya utilizado en el ámbito.");
             } else {
