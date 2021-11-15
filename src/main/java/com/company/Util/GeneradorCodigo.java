@@ -311,7 +311,11 @@ public class GeneradorCodigo {
     }
 
     private static void generarCodigoAsignacionFuncionVariable(Terceto t){
-        mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(t.getOperando2()) + "\n");
+        if(referenciasFunciones.get(t.getOperando2()) != null)
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "i32.const " + referenciasFunciones.get(t.getOperando2()) + "\n");
+        else // Es una variable de tipo funcion
+            mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "global.get $" + t.getOperando2() + "\n");
+
         mainWatAux = mainWatAux.concat("\t".repeat(tabs) + "global.set $" + t.getOperando1() + "\n");
     }
 
@@ -485,11 +489,13 @@ public class GeneradorCodigo {
 
         if (t.getOperando1().startsWith("[")){
             rearmarCadenaTercetos(t.getOperando1());
-            generarVariableAuxiliar(tipo, t.getOperando1());
+            if(!getTerceto(t.getOperando1()).getOperador().equals("CONV")) // Porque ya setea la variable auxiliar
+                generarVariableAuxiliar(tipo, t.getOperando1());
         }
         if (t.getOperando2().startsWith("[")){
             rearmarCadenaTercetos(t.getOperando2());
-            generarVariableAuxiliar(tipo, t.getOperando2());
+            if(!getTerceto(t.getOperando2()).getOperador().equals("CONV")) // Porque ya setea la variable auxiliar
+                generarVariableAuxiliar(tipo, t.getOperando2());
         }
         // String tipo = (tablaSimbolos.get(t.getOperando1()).get("TIPO").equals("INT"))?"i32":"f32";
         

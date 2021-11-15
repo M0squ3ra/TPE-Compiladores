@@ -1,7 +1,7 @@
 Mi_programa;
 
 INT a;
-INT FUNC (INT) varf;
+INT FUNC (INT) varf1,varf2;
 
 INT FUNC A(INT g)
 BEGIN
@@ -19,16 +19,19 @@ END;
 BEGIN
     a := 1;
     IF(a == 1) THEN
-        varf := A;
+        varf1 := A;
     ELSE
-        varf := B;
+        varf1 := B;
     ENDIF;
     
-    a := varf(2);
+    a := varf1(2);
     IF(a == 1) THEN
-        varf := A;
+        varf1 := A;
     ELSE
-        varf := B;
+        varf1 := B;
     ENDIF;
-    a := varf(2);
+
+    varf2 := varf1;
+
+    a := varf2(2);
 END

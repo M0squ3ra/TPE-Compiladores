@@ -1,0 +1,13 @@
+Mi_programa;
+
+INT a;
+SINGLE b;
+
+BEGIN
+    a := 2;
+    b := SINGLE(1 + a) + SINGLE(a) + 2.0;
+
+    IF (b == SINGLE(7)) THEN
+        PRINT(%b es igual a 7%);
+    ENDIF;
+END

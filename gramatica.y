@@ -278,6 +278,7 @@ ASIGNACION_ERROR:               error ASIGNACION EXPRESION ';' {yyerror("Falta e
 PRINT_ERROR:                    PRINT CADENA ')' ';' {yyerror("Falta el primer paréntesis del PRINT.");}
                                 | PRINT '(' ')' ';' {yyerror("Falta la cadena del PRINT.");}
                                 | PRINT '(' CADENA ';' {yyerror("Falta el último paréntesis del PRINT.");}
+                                | PRINT error ';' {yyerror("Error en la sentencia PRINT");}
                                 ;
 
 CONDICION:                      CONDICION_OR {$$ = $1;}
